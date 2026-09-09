@@ -39,9 +39,9 @@ Iga päring kogub tööriistaga tegelikult tagastatud lõigud eraldi request-loc
 
 ## Turvalisus ja OpenAI-le saadetavad andmed
 
-Enne mudelikõnet blokeeritakse prompt injection'i, rolli ümberkirjutamise, prompti/tööriistade avaldamise, path traversal'i, destruktiivsete juhiste ja ilmsete saladuste mustrid. Täielikku küsimust tootmisstiilis logisse ei kirjutata. Aktsepteeritud küsimus, kuni neli sama sessiooni varasemat küsimust ja valideeritud vastust, süsteemiprompt ning allowlistitud tööriistade skeemid/tulemused võidakse saata OpenAI-le. Ära saada agenti päris paroole, API võtmeid ega isikuandmeid.
+Enne mudelikõnet blokeeritakse üle 2000 märgi pikkune sisend ning prompt injection'i, rolli ümberkirjutamise, prompti/tööriistade avaldamise, path traversal'i, destruktiivsete juhiste ja ilmsete saladuste mustrid. Tundliku sisendi kontroll hõlmab muu hulgas märgendatud paroole ja API võtmeid, bearer-tokeneid, privaatvõtmeid ning 11-kohalisi isikukoode. Turvalogisse kirjutatakse ainult keeldumise kategooria ja sisendi pikkus, mitte täielik küsimus ega leitud saladuse väärtus. Aktsepteeritud küsimus, kuni neli sama sessiooni varasemat küsimust ja valideeritud vastust, süsteemiprompt ning allowlistitud tööriistade skeemid/tulemused võidakse saata OpenAI-le. Ära saada agenti päris paroole, API võtmeid ega isikuandmeid.
 
-Piirangud: mustripõhine tundliku info ja rünnete tuvastus ei tuvasta kõiki variante; sessioonid on lokaalsed, mälupõhised ja autentimata; rate limiting puudub; teadmusbaasi otsing on väikese fikseeritud korpuse deterministlik märksõnaotsing.
+Tööriista otsinguargument on piiratud 500 märgiga; traversal- ja absoluutsed failiteed lükatakse tagasi ning ühtegi kasutaja määratud teed ei avata. Piirangud: mustripõhine tundliku info ja rünnete tuvastus ei tuvasta kõiki variante; sessioonid on lokaalsed, mälupõhised ja autentimata; rate limiting puudub; teadmusbaasi otsing on väikese fikseeritud korpuse deterministlik märksõnaotsing.
 
 ## Testimine
 
