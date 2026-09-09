@@ -47,6 +47,16 @@ Tööriista otsinguargument on piiratud 500 märgiga; traversal- ja absoluutsed 
 
 ```sh
 ./gradlew test
+./gradlew integrationTest
 ```
 
-Unit-testid ei vaja OpenAI võtit ega tee võrgukutseid. Need katavad API valideerimist, turvafiltrit, rollide eraldust, KB otsingut ja allowlist'i, sessiooni järelkonteksti ning praeguse päringu allikate valideerimist. Gradle HTML raport paikneb `build/reports/tests/test/index.html` ja seda ei commitita.
+Unit-testid ei vaja OpenAI võtit ega tee võrgukutseid. Need katavad API-01, API-02, API-03 ja SEC-07 stsenaariumid ning API valideerimist, turvafiltrit, rollide eraldust, KB otsingut ja allowlist'i, sessiooni järelkonteksti ning praeguse päringu allikate valideerimist.
+
+`integrationTest` on eraldi Gradle task ja lähtekogum. See käivitab rakenduse juhuslikul lokaalsel pordil ning testib päris REST → agent → Spring AI → OpenAI voogu. Kaetud on API-04, UC-01–UC-13 ja SEC-01–SEC-06 ning SEC-08; testinimed säilitavad stsenaariumi ID-d ja kontrollivad käitumist, allikaid, viiteid ning keeldumisi, mitte mudeli täpset sõnastust. Iga SEC-test kontrollib nii ülesandes antud sisendi fail-fast keeldumist kui ka sama ründe-eesmärgiga parafraasi, mis jõuab tõendatult päris mudeligatewayni. Testiklass jäetakse vahele, kui `OPENAI_API_KEY` või `OPENAI_MODEL` puudub. Võtmega käivitamiseks ekspordi mõlemad väärtused enne taski käivitamist. Integratsiooniprofiil kasutab mudeliteülese ühilduvuse jaoks temperatuuri `1.0`; rakenduse tavakonfiguratsiooni `OPENAI_TEMPERATURE` jääb seejuures muutmata.
+
+Eraldi HTML raportid tekivad asukohtades:
+
+- unit-testid: `build/reports/tests/test/index.html`
+- integratsioonitestid: `build/reports/tests/integrationTest/index.html`
+
+Raportid asuvad ignoreeritud `build/` kataloogis ja neid ei commitita. GitHub Actions käivitab mõlemad taskid ning avaldab raportid eraldi `unit-test-html-report` ja `integration-test-html-report` artefaktidena. Kui OpenAI saladusi pole seadistatud, näitab integratsiooniraport vahele jäetud teste; päris mudeliga jooksuks tuleb seadistada GitHubi `OPENAI_API_KEY` secret ja `OPENAI_MODEL` secret või repository variable.
