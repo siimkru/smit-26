@@ -25,6 +25,14 @@ When implementing, reviewing, testing, or making architectural decisions:
 
 When uncertain, prefer the smallest implementation that fully satisfies `docs/assignment.md`.
 
+## Commit Message Convention
+
+Every commit message must use this structure:
+
+`<type>: <short imperative description>`
+
+Use a lowercase type followed by a colon and one space. Keep the description concise, start it with a lowercase imperative verb, and do not end it with a period. Use one of these types unless the change clearly requires another: `build`, `ci`, `docs`, `feat`, `fix`, `refactor`, `security`, or `test`.
+
 ## Implementation Principles
 
 Keep the system deliberately simple.
