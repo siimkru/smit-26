@@ -1,6 +1,7 @@
 package ee.smit.agent.agent;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -46,7 +47,7 @@ public class SpringAiOpenAiGateway implements AgentModelGateway {
         }
     }
 
-    private AgentDecision parseDecision(String content) {
+    AgentDecision parseDecision(String content) {
         if (content == null || content.isBlank()) {
             return new AgentDecision(null, List.of(), null);
         }
@@ -55,7 +56,10 @@ public class SpringAiOpenAiGateway implements AgentModelGateway {
             json = json.replaceFirst("^```(?:json)?\\s*", "").replaceFirst("\\s*```$", "");
         }
         try {
-            return objectMapper.readValue(json, AgentDecision.class);
+            return objectMapper.readerFor(AgentDecision.class)
+                    .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                    .readValue(json);
         } catch (JsonProcessingException exception) {
             return new AgentDecision(null, List.of(), null);
         }
