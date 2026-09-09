@@ -77,6 +77,30 @@ class AgentApiTest {
     }
 
     @Test
+    @DisplayName("malformed JSON returns 400 without agent invocation")
+    void rejectsMalformedJson() throws Exception {
+        mockMvc.perform(post("/api/v1/agent/ask")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"question\":"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_JSON"));
+
+        verifyNoInteractions(agentService);
+    }
+
+    @Test
+    @DisplayName("invalid session identifier returns 400 without agent invocation")
+    void rejectsInvalidSessionId() throws Exception {
+        mockMvc.perform(post("/api/v1/agent/ask")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"question\":\"gitlab ligipääs?\",\"sessionId\":\"../other\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(agentService);
+    }
+
+    @Test
     @DisplayName("SEC-07 - overlong question returns 400 before agent invocation")
     void rejectsOverlongQuestion() throws Exception {
         String question = "x".repeat(3001);
