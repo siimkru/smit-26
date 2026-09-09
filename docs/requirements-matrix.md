@@ -4,7 +4,7 @@ This document turns `docs/assignment.md` into an implementation and review plan.
 
 The component names and test names below are proposed; they are the traceability targets for implementation.
 
-`docs/architecture.md` is authoritative for design decisions; `docs/assignment.md` defines assignment requirements, and `docs/requirements-matrix.md` traces those requirements to the selected design.
+`docs/assignment.md` is the sole normative source of requirements for this take-home assignment. This matrix is non-normative traceability and implementation guidance, and `docs/architecture.md` records the selected design. If either document conflicts with the original assignment, the assignment wins.
 
 ## Core grounding invariant
 
@@ -46,7 +46,7 @@ Evidence must be retrieved through allowlisted tools in the current request. Ses
 
 ## 2. Requirements traceability matrix
 
-The entries describe implementation scope, not work already completed.
+The entries describe implementation scope, not work already completed. The `R-*` labels are local traceability identifiers derived from `docs/assignment.md`; they do not create or strengthen requirements beyond its text. Design details in this matrix remain implementation choices unless the assignment explicitly requires them.
 
 ### 2.1 Technical stack and repository constraints
 
@@ -103,7 +103,7 @@ The entries describe implementation scope, not work already completed.
 | R-PROMPT-03 | Limit factual claims to approved sources | Prompt explicitly requires tool lookup and source-backed factual claims; C7 enforces the rule independently | Grounding tests; UC-10, UC-12 |
 | R-PROMPT-04 | Refuse out-of-scope, unsupported, sensitive, and attacking requests | Prompt defines refusal behavior; C2 fail-fast policy handles obvious injection/sensitive patterns before the model | UC-09–12; SEC-01–08 |
 | R-PROMPT-05 | Define the output format | Use internal `AgentDecision` with action, current-request passage IDs, and closed clarification/refusal categories; C7 alone constructs public `AgentResponse` | API-04; structured-output and malformed-output unit tests |
-| R-PROMPT-06 | Cite all used sources, including multiple files | Prompt requires passage selection; C7 constructs citations and deduplicated canonical sources for every selected passage | UC-01, UC-03, UC-04, UC-13; grounding tests |
+| R-PROMPT-06 | Cite all used sources, including multiple files | Prompt requires passage selection; C7 constructs citations and canonical sources for every selected passage, deduplicating by passage ID rather than filename | UC-01, UC-03, UC-04, UC-13; grounding tests |
 | R-PROMPT-07 | Answer source questions with file name and excerpt | `searchKnowledgeBase` result is exposed as source metadata; C7 preserves it for a source question | UC-13 |
 | R-PROMPT-08 | Keep system and user roles separate | C6 creates a trusted system message and an independent user message; session history is also role-tagged, never concatenated into system text | `PromptAssemblyTest`; SEC-01–05, SEC-08 |
 | R-PROMPT-09 | Never disclose system prompt, tool definitions, or internal rules | System prompt and C7 refusal policy explicitly prohibit disclosure; tool schemas are not returned in normal API output | SEC-01, SEC-02, SEC-05 |
@@ -123,10 +123,10 @@ The entries describe implementation scope, not work already completed.
 | R-SEC-08 | Restrict the agent to allowlisted tools | C4 exposes only two read-only tools; no generic tool is registered | ToolAllowlistTest; SEC-02, SEC-06 |
 | R-SEC-09 | Prevent unsupported output from escaping | C7 requires every factual component to derive from validated current-request retrieved passages; genuine excerpts plus arbitrary model prose are insufficient | GroundingValidatorTest; API-04; UC-10, UC-12 |
 | R-SEC-10 | Avoid full-question production logging | Structured logs contain request ID, result category, refusal category, and timing; no question or model prompt | Log policy review |
-| R-SEC-11 | Do not send sensitive data to OpenAI | C2 rejects obvious credentials/secrets and the synthetic KB contains no sensitive data; README tells users not to submit secrets | Sensitive-input tests; README review |
+| R-SEC-11 | Do not send sensitive data to OpenAI | C2 rejects documented credential, API-key, password, and personal-code patterns; the synthetic KB contains no sensitive data; README tells users not to submit secrets and documents the detector's limits and retransmission of accepted session context | Representative sensitive-input tests; fixture and README review |
 | R-SEC-12 | Describe data processing in README | README documents request flow, model transmission, in-memory session retention, logs, and non-production fixtures | Documentation checklist |
 | R-SEC-13 | Reject traversal-like tool requests | C2 can fail fast on `../`, absolute paths, and known sensitive file names; C4 independently cannot resolve arbitrary paths | SEC-06; tool boundary tests |
-| R-SEC-14 | Keep session context from changing trusted instructions | C5 stores only bounded role-tagged turns and inserts them as conversation context; session IDs cannot select files or prompts | SessionStore unit test; UC-06; SEC-03 |
+| R-SEC-14 | Keep session context from changing trusted instructions | C5 stores only bounded role-tagged turns and inserts them as conversation context; session IDs cannot select files or prompts; active sessions cannot be evicted into concurrent replacement state | SessionStore isolation, active-eviction, and concurrency unit tests; UC-06; SEC-03 |
 | R-SEC-15 (optional) | Add simple IP/session rate limiting | Keep a documented extension point; do not make it part of the minimum slice unless time permits, because the assignment marks it optional and this is not a production platform | If implemented: focused limiter unit test; otherwise README limitation |
 
 ### 2.6 Configuration and local operation
@@ -148,7 +148,7 @@ The entries describe implementation scope, not work already completed.
 | R-TEST-04 | Cover knowledge-base search | C10 tests matching, no-match, multiple-source, excerpt bounds, and topic listing | Search test suite |
 | R-TEST-05 | Cover tool allowlisting | C10 asserts exactly the intended registered tools and rejects unknown/path-like requests | `ToolAllowlistTest`; SEC-02, SEC-06 |
 | R-TEST-06 | Cover API validation failures | MockMvc tests for empty and missing `question`, malformed JSON, and length errors | API-01, API-02, SEC-07 |
-| R-TEST-07 | Cover source/citation validation | C10 tests missing evidence, fabricated/unretrieved/stale passage IDs, cross-request isolation, rejection of model prose, exact canonical answer/source/citation assembly, multi-source output, and sourced low-confidence clarification versus refusal | API-04; grounding tests |
+| R-TEST-07 | Cover source/citation validation | C10 tests missing evidence, fabricated/unretrieved/stale passage IDs, cross-request isolation, rejection of model prose, action-specific evidence requirements, multiple passages from one file, relevance rejection for an unsupported named target, exact canonical answer/source/citation assembly, multi-source output, and sourced low-confidence clarification versus refusal | API-04; grounding tests |
 | R-TEST-08 | Keep integrations separate from units | Add a Gradle `integrationTest` source set/task, or an equivalent JUnit tag with a separate task; integration tests require `OPENAI_API_KEY` | Task configuration review |
 | R-TEST-09 | Use a real OpenAI model for integration tests | C11 starts the API test context and uses the configured Spring AI OpenAI client when the key is available | UC/SEC integration run |
 | R-TEST-10 | Test behavior, not exact LLM wording | Assertions inspect refusal/source/citation/language/safety predicates, not a fixed answer string | C11 test review |
@@ -184,7 +184,7 @@ The entries describe implementation scope, not work already completed.
 
 ## 3. Test-ID traceability matrix
 
-The integration suite should use a stable fixture set and behavioral assertions. It should not assert exact model wording. For SEC-01–06 and SEC-08, test the original attacks through REST and assert no provider call when the pre-filter blocks them. Each ID must also have a real-model REST → agent → OpenAI integration case. If the original string is blocked, add a semantically equivalent synthetic adversarial variant that passes the unchanged detector, assert that the provider was called, and verify the same safety outcome. Do not disable or weaken production filters for these tests. Keep SEC-07 in keyless unit/API tests with HTTP 400 and no provider call; never force overlong input through the model. Every proposed method below must carry an `@DisplayName` containing the exact ID from its row; camel-case method names alone do not satisfy traceability.
+The integration suite should use a stable fixture set and behavioral assertions. It should not assert exact model wording. For SEC-01–06 and SEC-08, test the original attacks through REST and assert no provider call when the pre-filter blocks them. Each ID must also have a real-model REST → agent → OpenAI integration case. Record a concrete synthetic paraphrase for each case that preserves the original attack objective while passing the unchanged detector, assert that the provider was called, and verify the same safety outcome. If a production-filter improvement later blocks a paraphrase, replace the paraphrase; do not disable, bypass, or weaken the production filter. Keep SEC-07 in keyless unit/API tests with HTTP 400 and no provider call; never force overlong input through the model. Every proposed method below must carry an `@DisplayName` containing the exact ID from its row; camel-case method names alone do not satisfy traceability.
 
 ### 3.1 API-* IDs
 
@@ -268,13 +268,13 @@ The only registered tools are:
 1. `listTopics()` — returns one canonical short topic-description `KnowledgePassage` per topic, including ID, file, title, and text.
 2. `searchKnowledgeBase(query)` — returns at most five canonical matching `KnowledgePassage` records. Both tools record returned passages in the current-request evidence ledger.
 
-C5 controls Spring AI tool execution with at most four model calls, six tool invocations, and a 30-second total deadline per request. Unknown tools, malformed arguments, and exhausted limits terminate safely. The tool registry is explicit rather than annotation-scanning every bean. Tool arguments are treated as untrusted strings and are length-bounded. The tools cannot return environment variables, arbitrary file contents, stack traces, or tool schemas.
+C5 controls Spring AI tool execution with at most four model calls, six tool invocations, and a 30-second total deadline per request. Unknown tools, malformed arguments, and exhausted limits produce a fixed refusal; provider unavailability and deadline expiry produce sanitized HTTP 503 responses. Retries share the budgets and deadline, and late work cannot update the response or session. The tool registry is explicit rather than annotation-scanning every bean. Tool arguments are treated as untrusted strings and are length-bounded. The tools cannot return environment variables, arbitrary file contents, stack traces, or tool schemas.
 
 ### 4.4 Session design
 
 `sessionId` is optional. Without it, each request is independent. With it, C5 stores a small number of recent role-tagged turns in a bounded in-memory store with a short configurable TTL and maximum session count. The store is a take-home convenience, not durable conversation storage: it is lost on restart, is not shared across instances, and must be documented as such.
 
-Store only accepted user questions and validated application responses: four exchanges per session, 15-minute idle TTL, maximum 1,000 sessions, oldest-idle eviction. Serialize turns within a session and allow different sessions concurrently. Refused and failed turns do not enter memory. Re-retrieve evidence for follow-ups; history is not proof. Session IDs are case-sensitive strings of 1–128 ASCII letters, digits, underscores, or hyphens, and are caller-managed context keys, not authentication. Document the need for unpredictable IDs. Only the minimum context needed for UC-06 is retained. A session ID is an opaque key; it never selects a file, prompt, tool, or secret. If the limits are exceeded, evict the oldest session/turn rather than growing unboundedly.
+Store only accepted user questions and validated application responses: four exchanges per session, 15-minute idle TTL, maximum 1,000 sessions, oldest-idle eviction. Serialize turns within a session and allow different sessions concurrently. Coordinate lookup, lock acquisition, and eviction atomically; do not expire or evict an active session, and count lock waiting toward the request deadline. If all slots are active, return a sanitized service-unavailable response. Refused, failed, timed-out, and otherwise terminated turns do not enter memory. Re-retrieve evidence for follow-ups; history is not proof. Session IDs are case-sensitive strings of 1–128 ASCII letters, digits, underscores, or hyphens, and are caller-managed context keys, not authentication. Anyone using the same ID shares its context; document this and the need for unpredictable IDs. Only the minimum context needed for UC-06 is retained. A session ID is an opaque key; it never selects a file, prompt, tool, or secret.
 
 ### 4.5 Output and grounding policy
 
@@ -297,10 +297,11 @@ C6 requests only an `AgentDecision`. C7 treats it as untrusted:
 
 1. Validate the action, closed categories, and selection shape; reject malformed output or model-written public prose.
 2. Resolve every selected ID against canonical passages returned by an allowlisted tool in this request. Existing but unretrieved IDs, prior-session evidence, and fabricated IDs are invalid.
-3. For factual answers, assemble exact selected passage text and append `[allikas: filename]` to each passage. Construct source filenames, titles, and excerpts from canonical records and deduplicate sources.
-4. For topic lists, use retrieved topic-description passages and canonical titles. For UC-07, use a fixed Estonian Kubernetes/CI/CD clarification supported by retrieved topic passages.
-5. Require non-empty validated sources for every `refused:false` response. Insufficient grounding produces a fixed refusal; a genuine filename/excerpt does not legitimize arbitrary model prose.
-6. Assign `high` to validated extractive answers/topic lists and `low` only to grounded ambiguous clarification (`refused:false`, with validated sources). Refusals use `confidence:null`, `refused:true`, a fixed reason, and empty sources; confidence is not applicable when no factual answer is given. Do not emit `medium`. Confidence describes evidence status, not calibrated probability.
+3. Apply action-specific evidence rules: `ANSWER` requires nonempty current-request selections; `LIST_TOPICS` requires all rendered topic descriptions from `listTopics()` in this request; `CLARIFY` requires evidence for every option named by the fixed template; and `REFUSE` carries no selected passages.
+4. For factual answers, assemble exact selected passage text and append `[allikas: filename]` to each passage. Construct source filenames, titles, and excerpts from canonical records and deduplicate by passage ID, not filename, so multiple supporting passages from one file retain their excerpts.
+5. For topic lists, use retrieved topic-description passages and canonical titles. For UC-07, use a fixed Estonian Kubernetes/CI/CD clarification supported by both retrieved topic passages.
+6. Require non-empty validated sources for every `refused:false` response. Insufficient grounding produces a fixed refusal; a genuine filename/excerpt does not legitimize arbitrary model prose. Ledger membership proves provenance, not relevance: conservative retrieval eligibility must reject generic-term matches for unsupported named targets such as the Mars server in UC-12.
+7. Assign `high` to validated extractive answers/topic lists and `low` only to grounded ambiguous clarification (`refused:false`, with validated sources). Refusals use `confidence:null`, `refused:true`, a fixed reason, and empty sources; confidence is not applicable when no factual answer is given. Do not emit `medium`. Confidence describes evidence status, not calibrated probability.
 
 The application owns every public field, including `answer`, `sources`, excerpts, confidence, citations, and refusal text. Successful responses have `refusalReason:null`.
 
