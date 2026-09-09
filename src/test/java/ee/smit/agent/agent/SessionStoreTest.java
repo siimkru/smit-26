@@ -17,4 +17,19 @@ class SessionStoreTest {
                 .extracting(AgentExchange::question)
                 .containsExactly("q2", "q3", "q4", "q5");
     }
+
+    @Test
+    void keepsSessionsIsolatedAndDoesNotPersistAnonymousTurns() {
+        SessionStore store = new SessionStore();
+        store.remember("session-a", new AgentExchange("a-question", "a-answer"));
+        store.remember("session-b", new AgentExchange("b-question", "b-answer"));
+        store.remember(null, new AgentExchange("anonymous-question", "anonymous-answer"));
+
+        assertThat(store.history("session-a")).extracting(AgentExchange::question)
+                .containsExactly("a-question");
+        assertThat(store.history("session-b")).extracting(AgentExchange::question)
+                .containsExactly("b-question");
+        assertThat(store.history(null)).isEmpty();
+        assertThat(store.history("missing")).isEmpty();
+    }
 }

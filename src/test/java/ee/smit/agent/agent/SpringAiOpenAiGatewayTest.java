@@ -7,6 +7,7 @@ import org.springframework.ai.tool.ToolCallbackProvider;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SpringAiOpenAiGatewayTest {
 
@@ -39,5 +40,12 @@ class SpringAiOpenAiGatewayTest {
 
         assertThat(decisionWithPublicProse.action()).isNull();
         assertThat(decisionWithTrailingText.action()).isNull();
+    }
+
+    @Test
+    void missingCredentialsFailLocallyWithoutAttemptingAnOpenAiCall() {
+        assertThatThrownBy(() -> gateway.decide("gitlab ligipääs?", List.of()))
+                .isInstanceOf(ModelUnavailableException.class)
+                .hasMessage("OpenAI konfiguratsioon puudub.");
     }
 }
