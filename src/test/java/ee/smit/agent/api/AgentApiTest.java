@@ -1,6 +1,7 @@
 package ee.smit.agent.api;
 
 import ee.smit.agent.agent.AgentService;
+import ee.smit.agent.agent.ModelUnavailableException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,5 +98,19 @@ class AgentApiTest {
                 .andExpect(jsonPath("$.status").value("UP"));
 
         verifyNoInteractions(agentService);
+    }
+
+    @Test
+    @DisplayName("provider unavailability returns a sanitized 503")
+    void returnsSanitizedServiceUnavailable() throws Exception {
+        AskRequest request = new AskRequest("Kuidas taotleda ligipääsu GitLabile?", null);
+        when(agentService.ask(request)).thenThrow(new ModelUnavailableException("secret provider detail"));
+
+        mockMvc.perform(post("/api/v1/agent/ask")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"question\":\"Kuidas taotleda ligipääsu GitLabile?\"}"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("MODEL_UNAVAILABLE"))
+                .andExpect(jsonPath("$.message").value("OpenAI teenus ei ole praegu saadaval."));
     }
 }
