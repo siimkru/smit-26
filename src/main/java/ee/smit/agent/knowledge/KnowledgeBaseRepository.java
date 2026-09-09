@@ -28,14 +28,14 @@ public class KnowledgeBaseRepository {
     private static final Map<String, List<String>> MANIFEST = Map.of(
             "gitlab-access.md", List.of("gitlab", "git", "ligipaas", "access"),
             "kubernetes-deploy.md", List.of("kubernetes", "k8s", "deploy", "juurutamine"),
-            "cicd.md", List.of("ci/cd", "cicd", "pipeline", "ehitamine"),
+            "cicd.md", List.of("ci/cd", "cicd", "pipeline", "ehitamine", "deploy", "juurutamine"),
             "code-review.md", List.of("code review", "koodireview", "merge", "pull request"),
             "access-management.md", List.of("ligipaasu haldus", "oigused", "kasutajakonto")
     );
     private static final Map<String, List<String>> TOPIC_ANCHORS = Map.of(
             "gitlab-access.md", List.of("gitlab"),
-            "kubernetes-deploy.md", List.of("kubernetes", "k8s", "helm"),
-            "cicd.md", List.of("ci/cd", "cicd", "pipeline"),
+            "kubernetes-deploy.md", List.of("kubernetes", "k8s", "helm", "deploy", "juurutamine"),
+            "cicd.md", List.of("ci/cd", "cicd", "pipeline", "deploy", "juurutamine"),
             "code-review.md", List.of("code review", "koodireview", "merge", "pull request", "ulevaataja"),
             "access-management.md", List.of("oigused", "kasutajakonto", "roll")
     );

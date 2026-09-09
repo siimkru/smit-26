@@ -34,6 +34,16 @@ class KnowledgeBaseRepositoryTest {
     }
 
     @Test
+    void genericDeployProblemOffersBothKubernetesAndCicdEvidence() {
+        assertThat(repository.search("deploy"))
+                .extracting(KnowledgePassage::file)
+                .containsExactlyInAnyOrder("kubernetes-deploy.md", "cicd.md");
+        assertThat(repository.search("Mul on probleem deploy'iga"))
+                .extracting(KnowledgePassage::file)
+                .containsExactlyInAnyOrder("kubernetes-deploy.md", "cicd.md");
+    }
+
+    @Test
     void returnsNoResultForUnknownTokens() {
         assertThat(repository.search("Marsi kvantvõtme orbitaaljaam")).isEmpty();
     }
