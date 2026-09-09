@@ -58,6 +58,43 @@ class GroundedResponseAssemblerTest {
     }
 
     @Test
+    void preservesEverySelectedSourceAndHumanReadableCitation() {
+        KnowledgePassage kubernetes = repository.search("kubernetes").getFirst();
+        KnowledgePassage cicd = repository.search("ci/cd pipeline").getFirst();
+
+        var response = assembler.assemble("Kas deploy käib Kubernetesi või CI/CD kaudu?", List.of(),
+                new AgentDecision("ANSWER", List.of(kubernetes.id(), cicd.id()), null),
+                Map.of(kubernetes.id(), kubernetes, cicd.id(), cicd));
+
+        assertThat(response.refused()).isFalse();
+        assertThat(response.sources()).extracting(ee.smit.agent.api.Source::file)
+                .containsExactly("kubernetes-deploy.md", "cicd.md");
+        assertThat(response.answer())
+                .contains("[allikas: kubernetes-deploy.md]", "[allikas: cicd.md]");
+    }
+
+    @Test
+    void ambiguousDeployClarificationIsLowConfidenceAndGroundedInBothTopics() {
+        List<KnowledgePassage> deployTopics = repository.listTopics().stream()
+                .filter(passage -> passage.file().equals("kubernetes-deploy.md")
+                        || passage.file().equals("cicd.md"))
+                .toList();
+        Map<String, KnowledgePassage> evidence = deployTopics.stream()
+                .collect(java.util.stream.Collectors.toMap(KnowledgePassage::id, passage -> passage));
+
+        var response = assembler.assemble("Mul on probleem deploy'iga", List.of(),
+                new AgentDecision("CLARIFY", deployTopics.stream().map(KnowledgePassage::id).toList(), null),
+                evidence);
+
+        assertThat(response.refused()).isFalse();
+        assertThat(response.confidence()).isEqualTo("low");
+        assertThat(response.sources()).extracting(ee.smit.agent.api.Source::file)
+                .containsExactlyInAnyOrder("kubernetes-deploy.md", "cicd.md");
+        assertThat(response.answer())
+                .contains("Kubernetesi", "CI/CD", "[allikas: kubernetes-deploy.md]", "[allikas: cicd.md]");
+    }
+
+    @Test
     void modelRefusalTextIsMappedToApplicationOwnedEstonianText() {
         var response = assembler.assemble("Mis on Eesti pealinn?", List.of(),
                 new AgentDecision("REFUSE", List.of(), "OUT_OF_SCOPE"), Map.of());
