@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: smit-it-agent
+  ai:
+    # The Spring AI dependency is present, but no model is created until the agent phase.
+    # This keeps the local health endpoint available without an API key.
+    model:
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:}
+          temperature: ${OPENAI_TEMPERATURE:0.2}
