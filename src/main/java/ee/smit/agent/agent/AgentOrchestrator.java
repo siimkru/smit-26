@@ -5,16 +5,12 @@ import ee.smit.agent.api.AskResponse;
 import ee.smit.agent.knowledge.CurrentTurnEvidence;
 import ee.smit.agent.response.GroundedResponseAssembler;
 import ee.smit.agent.security.RequestSecurityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 public class AgentOrchestrator implements AgentService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentOrchestrator.class);
 
     private final RequestSecurityService security;
     private final AgentModelGateway model;
@@ -36,7 +32,6 @@ public class AgentOrchestrator implements AgentService {
     public AskResponse ask(AskRequest request) {
         Optional<String> refusal = security.refusalReason(request.question());
         if (refusal.isPresent()) {
-            LOGGER.warn("Agent request refused before model call; questionLength={}", request.question().length());
             return responses.refusal(refusal.get());
         }
 
