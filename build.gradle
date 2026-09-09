@@ -26,6 +26,33 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-tasks.named('test') {
+sourceSets {
+    integrationTest {
+        java.srcDir 'src/integrationTest/java'
+        resources.srcDir 'src/integrationTest/resources'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+tasks.named('test', Test) {
     useJUnitPlatform()
+    reports.html.required = true
+    reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/test')
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs the real OpenAI REST integration scenarios.'
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
+    reports.html.required = true
+    reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/integrationTest')
 }
