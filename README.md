@@ -1,6 +1,6 @@
 # SMIT IT teenuste info agent
 
-See projekt on Spring Booti ja Spring AI põhine IT-teenuste infoagendi alus. Praeguses etapis on olemas REST API leping, sisendi valideerimine, tervisekontroll ja OpenAI konfiguratsioon; teadmusbaasi agent ning OpenAI kutse lisatakse järgmises etapis.
+See projekt on Spring Booti ja Spring AI põhine IT-teenuste infoagendi alus. Praeguses etapis on olemas REST API leping, sisendi valideerimine, tervisekontroll, OpenAI konfiguratsioon ning staatiline teadmusbaasi kiht; agendi orkestreerimine ja OpenAI kutse lisatakse järgmises etapis.
 
 Projekt kasutab Java 21, Spring Boot 3.4.5, Spring AI 1.0.0 ja Gradle Wrapperit.
 
@@ -24,6 +24,12 @@ curl -X POST http://localhost:8080/api/v1/agent/ask \
 ## Konfiguratsioon
 
 OpenAI võti tuleb keskkonnamuutujast `OPENAI_API_KEY`; seda ei salvestata reposse. Mudel ja temperatuur on seadistatavad vastavalt `OPENAI_MODEL` ja `OPENAI_TEMPERATURE`. Kuni agenti ei ole, on Spring AI mudelite automaatne loomine välja lülitatud, et tervisekontroll töötaks ka võtmeta. Küsimusi ega API võtmeid see alus logidesse ei kirjuta.
+
+## Teadmusbaas ja tööriistad
+
+Teadmusbaas sisaldab viit sünteetilist Markdowni dokumenti kataloogis `src/main/resources/knowledge-base/`: GitLabi ligipääs, Kubernetesi juurutamine, CI/CD, koodireview ja ligipääsude haldus. Rakendus loeb käivitamisel ainult selle fikseeritud nimekirja classpath-ressursse ning hoiab tulemuse muutumatu mälustruktuurina.
+
+Spring AI jaoks on registreeritud täpselt kaks read-only tööriista: `listTopics` ja `searchKnowledgeBase`. Otsingusõna on alati andmesisend, mitte failitee; teekujulised väärtused tagastavad tühja tulemuse. Tööriistad ei paku faililugemist, kirjutamist, käske ega väliseid süsteeme.
 
 ## Testimine
 
