@@ -48,6 +48,10 @@ class KnowledgeBaseToolsTest {
     void traversalLikeSearchInputCannotReadArbitraryFiles() {
         assertThat(tools.searchKnowledgeBase("../../../etc/passwd")).isEmpty();
         assertThat(tools.searchKnowledgeBase("..\\..\\secrets.txt")).isEmpty();
+        assertThat(tools.searchKnowledgeBase("/Users/example/.ssh/id_rsa")).isEmpty();
+        assertThat(tools.searchKnowledgeBase("/tmp/gitlab")).isEmpty();
+        assertThat(tools.searchKnowledgeBase("x".repeat(KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH + 1)))
+                .isEmpty();
     }
 
     @Test

@@ -42,4 +42,20 @@ class KnowledgeBaseRepositoryTest {
     void genericAccessWordDoesNotGroundAnUnknownNamedTarget() {
         assertThat(repository.search("Kuidas taotleda ligipääsu Marsi serverile?")).isEmpty();
     }
+
+    @Test
+    void allowsCicdTermWithoutTreatingItsSlashAsAFilePath() {
+        assertThat(repository.search("Kuidas CI/CD pipeline töötab?"))
+                .extracting(KnowledgePassage::file)
+                .contains("cicd.md");
+    }
+
+    @Test
+    void rejectsAbsoluteTraversalAndOversizedSearchArguments() {
+        assertThat(repository.search("/etc/passwd")).isEmpty();
+        assertThat(repository.search("/tmp/gitlab")).isEmpty();
+        assertThat(repository.search("C:\\Windows\\System32\\drivers\\etc\\hosts")).isEmpty();
+        assertThat(repository.search("../knowledge-base/gitlab-access.md")).isEmpty();
+        assertThat(repository.search("x".repeat(KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH + 1))).isEmpty();
+    }
 }

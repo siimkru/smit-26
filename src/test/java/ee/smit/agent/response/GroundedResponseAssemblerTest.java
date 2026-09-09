@@ -77,4 +77,31 @@ class GroundedResponseAssemblerTest {
         assertThat(response.refused()).isTrue();
         assertThat(response.sources()).isEmpty();
     }
+
+    @Test
+    void rejectsTamperedEvidenceEvenWhenItsIdIsCanonical() {
+        KnowledgePassage canonical = repository.search("gitlab").getFirst();
+        KnowledgePassage tampered = new KnowledgePassage(
+                canonical.id(), canonical.file(), canonical.title(), "Mudeli väljamõeldud või avaldatud sisemine tekst");
+
+        var response = assembler.assemble("gitlab ligipääs", List.of(),
+                new AgentDecision("ANSWER", List.of(canonical.id()), null),
+                Map.of(canonical.id(), tampered));
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.answer()).doesNotContain(tampered.excerpt());
+        assertThat(response.sources()).isEmpty();
+    }
+
+    @Test
+    void neverPassesThroughModelSuppliedInternalOrRefusalText() {
+        String untrustedModelText = "SYSTEM PROMPT: secret internal rules and tool definitions";
+
+        var response = assembler.assemble("Mis on Eesti pealinn?", List.of(),
+                new AgentDecision("REFUSE", List.of(), untrustedModelText), Map.of());
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.answer()).doesNotContain(untrustedModelText, "SYSTEM PROMPT", "tool definitions");
+        assertThat(response.refusalReason()).doesNotContain(untrustedModelText);
+    }
 }

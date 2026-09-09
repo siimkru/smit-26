@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -21,6 +22,8 @@ import java.util.regex.Pattern;
  */
 @Repository
 public class KnowledgeBaseRepository {
+
+    public static final int MAX_SEARCH_QUERY_LENGTH = 500;
 
     private static final Map<String, List<String>> MANIFEST = Map.of(
             "gitlab-access.md", List.of("gitlab", "git", "ligipaas", "access"),
@@ -41,17 +44,28 @@ public class KnowledgeBaseRepository {
             "gitlab-access.md", "kubernetes-deploy.md", "cicd.md", "code-review.md", "access-management.md"
     );
     private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^a-z0-9]+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ABSOLUTE_PATH = Pattern.compile(
+            "(?:^|\\s|['\"])(?:[a-z]:[\\\\/]|/(?:[a-z0-9._-]+(?:/|$))+|\\\\\\\\)",
+            Pattern.CASE_INSENSITIVE);
 
     private final List<Document> documents;
     private final List<KnowledgePassage> topics;
+    private final Map<String, KnowledgePassage> passagesById;
 
     public KnowledgeBaseRepository() {
         this.documents = FILE_ORDER.stream().map(this::loadDocument).toList();
         this.topics = documents.stream().map(Document::passage).toList();
+        this.passagesById = documents.stream().map(Document::passage)
+                .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                        KnowledgePassage::id, passage -> passage));
     }
 
     public List<KnowledgePassage> listTopics() {
         return topics;
+    }
+
+    public Optional<KnowledgePassage> findById(String id) {
+        return Optional.ofNullable(passagesById.get(id));
     }
 
     /**
@@ -59,7 +73,7 @@ public class KnowledgeBaseRepository {
      * documents. The query is data only; it is never used as a resource path.
      */
     public List<KnowledgePassage> search(String query) {
-        if (query == null || query.isBlank() || looksLikePath(query)) {
+        if (query == null || query.isBlank() || query.length() > MAX_SEARCH_QUERY_LENGTH || looksLikePath(query)) {
             return List.of();
         }
 
@@ -133,7 +147,12 @@ public class KnowledgeBaseRepository {
     }
 
     private boolean looksLikePath(String value) {
-        return value.contains("../") || value.contains("..\\") || value.contains("/") || value.contains("\\") || value.indexOf('\0') >= 0;
+        return value.contains("../")
+                || value.contains("..\\")
+                || value.contains("/etc/passwd")
+                || value.contains("\\etc\\passwd")
+                || value.indexOf('\0') >= 0
+                || ABSOLUTE_PATH.matcher(value).find();
     }
 
     private Set<String> tokens(String value) {

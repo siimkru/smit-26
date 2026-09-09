@@ -123,10 +123,11 @@ public class GroundedResponseAssembler {
         List<KnowledgePassage> passages = new ArrayList<>();
         for (String id : uniqueIds) {
             KnowledgePassage passage = evidence.get(id);
-            if (passage == null) {
+            KnowledgePassage canonical = repository.findById(id).orElse(null);
+            if (passage == null || !passage.equals(canonical)) {
                 return List.of();
             }
-            passages.add(passage);
+            passages.add(canonical);
         }
         return List.copyOf(passages);
     }
