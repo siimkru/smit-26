@@ -29,6 +29,13 @@ public class KnowledgeBaseRepository {
             "code-review.md", List.of("code review", "koodireview", "merge", "pull request"),
             "access-management.md", List.of("ligipaasu haldus", "oigused", "kasutajakonto")
     );
+    private static final Map<String, List<String>> TOPIC_ANCHORS = Map.of(
+            "gitlab-access.md", List.of("gitlab"),
+            "kubernetes-deploy.md", List.of("kubernetes", "k8s", "helm"),
+            "cicd.md", List.of("ci/cd", "cicd", "pipeline"),
+            "code-review.md", List.of("code review", "koodireview", "merge", "pull request", "ulevaataja"),
+            "access-management.md", List.of("oigused", "kasutajakonto", "roll")
+    );
 
     private static final List<String> FILE_ORDER = List.of(
             "gitlab-access.md", "kubernetes-deploy.md", "cicd.md", "code-review.md", "access-management.md"
@@ -95,10 +102,17 @@ public class KnowledgeBaseRepository {
                 .orElseThrow(() -> new IllegalStateException("Teadmusbaasi dokument on tühi: " + file));
 
         return new Document(new KnowledgePassage(file + "#1", file, title, excerpt),
-                tokens(title + " " + excerpt + " " + String.join(" ", MANIFEST.get(file))));
+                tokens(title + " " + excerpt + " " + String.join(" ", MANIFEST.get(file))),
+                tokens(String.join(" ", TOPIC_ANCHORS.get(file))));
     }
 
     private int score(Document document, Set<String> queryTokens) {
+        boolean hasTopicAnchor = queryTokens.stream()
+                .anyMatch(queryToken -> document.anchors().stream()
+                        .anyMatch(anchor -> matches(anchor, queryToken)));
+        if (!hasTopicAnchor) {
+            return 0;
+        }
         int score = 0;
         for (String token : queryTokens) {
             if (document.tokens().stream().anyMatch(documentToken -> matches(documentToken, token))) {
@@ -136,7 +150,7 @@ public class KnowledgeBaseRepository {
         return result;
     }
 
-    private record Document(KnowledgePassage passage, Set<String> tokens) {
+    private record Document(KnowledgePassage passage, Set<String> tokens, Set<String> anchors) {
     }
 
     private record ScoredPassage(KnowledgePassage passage, int score) {

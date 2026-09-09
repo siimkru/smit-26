@@ -12,7 +12,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class KnowledgeBaseToolsTest {
 
-    private final KnowledgeBaseTools tools = new KnowledgeBaseTools(new KnowledgeBaseRepository());
+    private final KnowledgeBaseTools tools = new KnowledgeBaseTools(
+            new KnowledgeBaseRepository(), new CurrentTurnEvidence());
     private final ToolAllowlist allowlist = new ToolAllowlist();
 
     @Test

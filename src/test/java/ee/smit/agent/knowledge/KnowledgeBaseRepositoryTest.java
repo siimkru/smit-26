@@ -37,4 +37,9 @@ class KnowledgeBaseRepositoryTest {
     void returnsNoResultForUnknownTokens() {
         assertThat(repository.search("Marsi kvantvõtme orbitaaljaam")).isEmpty();
     }
+
+    @Test
+    void genericAccessWordDoesNotGroundAnUnknownNamedTarget() {
+        assertThat(repository.search("Kuidas taotleda ligipääsu Marsi serverile?")).isEmpty();
+    }
 }

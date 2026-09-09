@@ -14,19 +14,25 @@ import java.util.List;
 public class KnowledgeBaseTools {
 
     private final KnowledgeBaseRepository repository;
+    private final CurrentTurnEvidence evidence;
 
-    public KnowledgeBaseTools(KnowledgeBaseRepository repository) {
+    public KnowledgeBaseTools(KnowledgeBaseRepository repository, CurrentTurnEvidence evidence) {
         this.repository = repository;
+        this.evidence = evidence;
     }
 
     @Tool(name = "listTopics", description = "Loetleb teadmusbaasi lubatud IT-teenuste teemad.")
     public List<KnowledgePassage> listTopics() {
-        return repository.listTopics();
+        List<KnowledgePassage> passages = repository.listTopics();
+        evidence.record(passages);
+        return passages;
     }
 
     @Tool(name = "searchKnowledgeBase", description = "Otsib lubatud teadmusbaasist küsimusega seotud lõike.")
     public List<KnowledgePassage> searchKnowledgeBase(
             @ToolParam(description = "Kasutaja küsimus või otsingusõnad, mitte failitee.") String query) {
-        return repository.search(query);
+        List<KnowledgePassage> passages = repository.search(query);
+        evidence.record(passages);
+        return passages;
     }
 }
