@@ -160,6 +160,8 @@ Preserve the assignment's validation and HTTP error behavior.
 
 Never commit an OpenAI API key.
 
+The workspace-local `.env` contains an actual OpenAI API key for development. Treat `.env` as sensitive: do not inspect or print its contents, include them in tool output or logs, copy them into documentation or tests, or add the file to Git. Tools may load the key into the process environment only when a task explicitly requires a real OpenAI integration run.
+
 Read `OPENAI_API_KEY` from the environment or another permitted external secret source.
 
 Keep model selection and relevant model parameters configurable.
