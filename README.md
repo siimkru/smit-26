@@ -1,19 +1,19 @@
 # SMIT IT teenuste info agent
 
-See projekt on Spring Booti ja Spring AI põhine IT-teenuste infoagendi alus. Praeguses etapis on olemas REST API leping, sisendi valideerimine, tervisekontroll, OpenAI konfiguratsioon ning staatiline teadmusbaasi kiht; agendi orkestreerimine ja OpenAI kutse lisatakse järgmises etapis.
+See projekt on Spring Booti ja Spring AI põhine piiratud IT-teenuste infoagent. Agent kasutab OpenAI mudelit ainult otsustamiseks, millised allowlistitud tööriistaga leitud teadmusbaasi lõigud vastavad küsimusele. Avaliku faktilise vastuse, allikad ja viited koostab Java kood täpselt valideeritud teadmusbaasi sisust.
 
 Projekt kasutab Java 21, Spring Boot 3.4.5, Spring AI 1.0.0 ja Gradle Wrapperit.
 
 ## Käivitamine
 
-Kopeeri `.env.example` väärtused oma lokaalsesse keskkonda ning määra tegelik `OPENAI_API_KEY` ainult siis, kui agenti hiljem kasutatakse. `OPENAI_MODEL` peab olema organisatsiooni poolt lubatud mudel. Praegune tervisekontroll ei vaja võtit.
+Määra keskkonnas `OPENAI_API_KEY` ja organisatsiooni poolt lubatud `OPENAI_MODEL`. `.env.example` sisaldab ainult näidisväärtusi; Spring Boot ei laadi `.env` faili ise, seega ekspordi väärtused shelli või kasuta IDE keskkonnaseadeid. Tervisekontroll käivitub ka võtmeta; agendipäring tagastab sel juhul HTTP 503.
 
 ```sh
 ./gradlew bootRun
 curl http://localhost:8080/api/v1/health
 ```
 
-Vastus on `{"status":"UP"}`. `POST /api/v1/agent/ask` võtab vastu `question` (kohustuslik, kuni 2000 tähemärki) ja valikulise `sessionId`-i. Agent ei ole veel rakendatud ning korrektne päring saab praegu HTTP 501; tühi, puuduv või liiga pikk `question` saab HTTP 400.
+Vastus on `{"status":"UP"}`. `POST /api/v1/agent/ask` võtab vastu `question` (kohustuslik, kuni 2000 tähemärki) ja valikulise `sessionId`-i. `sessionId` võib sisaldada 1–128 ASCII tähte, numbrit, alakriipsu või sidekriipsu. Tühi, puuduv või liiga pikk küsimus saab HTTP 400.
 
 ```sh
 curl -X POST http://localhost:8080/api/v1/agent/ask \
@@ -21,9 +21,13 @@ curl -X POST http://localhost:8080/api/v1/agent/ask \
   -d '{"question":"Kuidas taotleda ligipääsu GitLabile?"}'
 ```
 
+Toetatud vastuses on `refused:false`, vähemalt üks valideeritud `sources` kirje ja vastuse tekstis viide kujul `[allikas: gitlab-access.md]`. Toetuseta või ohtlik päring tagastab HTTP 200 vastuse `refused:true`, tühja `sources` massiivi ja selge `refusalReason`-i. Mudeliteenuse puudumine või tõrge tagastab sanitiseeritud HTTP 503.
+
 ## Konfiguratsioon
 
-OpenAI võti tuleb keskkonnamuutujast `OPENAI_API_KEY`; seda ei salvestata reposse. Mudel ja temperatuur on seadistatavad vastavalt `OPENAI_MODEL` ja `OPENAI_TEMPERATURE`. Kuni agenti ei ole, on Spring AI mudelite automaatne loomine välja lülitatud, et tervisekontroll töötaks ka võtmeta. Küsimusi ega API võtmeid see alus logidesse ei kirjuta.
+OpenAI võti tuleb keskkonnamuutujast `OPENAI_API_KEY`; seda ei salvestata reposse. Mudel ja temperatuur on seadistatavad vastavalt `OPENAI_MODEL` ja `OPENAI_TEMPERATURE`. Spring AI mudelite automaatne loomine on välja lülitatud: rakendus loob piiratud `ChatClient`-i ise ainult siis, kui võti ja mudel on olemas, ning annab sellele ainult KB tööriistad.
+
+Eestikeelne süsteemiprompt asub `src/main/resources/prompts/agent-system.txt`. Spring AI sõnumiloendis on süsteemijuhis `system` rollis ning küsimus ja sessiooniajalugu eraldi `user`/`assistant` rollides. Mudel tagastab sisemise otsuse ja lõigu-ID-d, mitte avalikku vastuseteksti.
 
 ## Teadmusbaas ja tööriistad
 
@@ -31,10 +35,18 @@ Teadmusbaas sisaldab viit sünteetilist Markdowni dokumenti kataloogis `src/main
 
 Spring AI jaoks on registreeritud täpselt kaks read-only tööriista: `listTopics` ja `searchKnowledgeBase`. Otsingusõna on alati andmesisend, mitte failitee; teekujulised väärtused tagastavad tühja tulemuse. Tööriistad ei paku faililugemist, kirjutamist, käske ega väliseid süsteeme.
 
+Iga päring kogub tööriistaga tegelikult tagastatud lõigud eraldi request-local ledger'isse. Ainult samas päringus leitud kanoonilisi ID-sid saab vastuses kasutada. Puuduv, väljamõeldud või varasema sessiooni ID põhjustab keeldumise. Valikuline sessioon hoiab mälus kuni neli valideeritud küsimuse-vastuse paari; see kaob restardil ning sama `sessionId` kasutajad jagavad konteksti. Sessiooniajalugu saadetakse järelküsimusel OpenAI-le, kuid seda ei käsitleta tõendina.
+
+## Turvalisus ja OpenAI-le saadetavad andmed
+
+Enne mudelikõnet blokeeritakse prompt injection'i, rolli ümberkirjutamise, prompti/tööriistade avaldamise, path traversal'i, destruktiivsete juhiste ja ilmsete saladuste mustrid. Täielikku küsimust tootmisstiilis logisse ei kirjutata. Aktsepteeritud küsimus, kuni neli sama sessiooni varasemat küsimust ja valideeritud vastust, süsteemiprompt ning allowlistitud tööriistade skeemid/tulemused võidakse saata OpenAI-le. Ära saada agenti päris paroole, API võtmeid ega isikuandmeid.
+
+Piirangud: mustripõhine tundliku info ja rünnete tuvastus ei tuvasta kõiki variante; sessioonid on lokaalsed, mälupõhised ja autentimata; rate limiting puudub; teadmusbaasi otsing on väikese fikseeritud korpuse deterministlik märksõnaotsing.
+
 ## Testimine
 
 ```sh
 ./gradlew test
 ```
 
-Unit-testid ei vaja OpenAI võtit ega tee võrgukutseid. Gradle HTML raport paikneb `build/reports/tests/test/index.html` ja seda ei commitita.
+Unit-testid ei vaja OpenAI võtit ega tee võrgukutseid. Need katavad API valideerimist, turvafiltrit, rollide eraldust, KB otsingut ja allowlist'i, sessiooni järelkonteksti ning praeguse päringu allikate valideerimist. Gradle HTML raport paikneb `build/reports/tests/test/index.html` ja seda ei commitita.
