@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/agent")
 public class AgentController {
@@ -19,5 +21,10 @@ public class AgentController {
     @PostMapping("/ask")
     public AskResponse ask(@Valid @RequestBody AskRequest request) {
         return agentService.ask(request);
+    }
+
+    @PostMapping("/sessions")
+    public SessionResponse createSession() {
+        return new SessionResponse(UUID.randomUUID().toString());
     }
 }

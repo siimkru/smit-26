@@ -51,6 +51,8 @@ curl http://localhost:8080/api/v1/health
 
 Agendilt küsimiseks kasuta `POST /api/v1/agent/ask`. `question` on kohustuslik ja kuni 2000 tähemärki. `sessionId` on valikuline ning võib sisaldada 1–128 ASCII tähte, numbrit, alakriipsu või sidekriipsu.
 
+Järelküsimuste jaoks loo ennustamatu sessiooni ID serveris käsuga `POST /api/v1/agent/sessions` ja kasuta vastuses saadud `sessionId` väärtust järgnevates küsimustes. Ära kasuta kasutajanime, e-posti aadressi ega muud äraarvatavat tunnust sessiooni ID-na.
+
 ```sh
 curl -X POST http://localhost:8080/api/v1/agent/ask \
   -H 'Content-Type: application/json' \
