@@ -35,7 +35,19 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || vars.OPENAI_MODEL }}
-        run: ./gradlew integrationTest
+          CI_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          ./gradlew integrationTest
+          if [ -z "$OPENAI_API_KEY" ] || [ -z "$OPENAI_MODEL" ]; then
+            echo "::warning::Real OpenAI integration tests were skipped because credentials are not configured."
+            echo "### OpenAI integration tests: skipped (credentials unavailable)" >> "$GITHUB_STEP_SUMMARY"
+            if [ "$CI_EVENT_NAME" = "workflow_dispatch" ]; then
+              echo "A manually requested integration validation must execute the real provider tests." >&2
+              exit 1
+            fi
+          else
+            echo "### OpenAI integration tests: executed against the real provider" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload integration-test HTML report
         if: always()
