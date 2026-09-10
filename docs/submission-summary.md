@@ -1,0 +1,15 @@
+# Arhitektuuri ja turvalisuse kokkuvõte
+
+Lahendus on üks sünkroonne Java 21 ja Spring Booti REST-rakendus. `POST /api/v1/agent/ask` saadab valideeritud küsimuse Spring AI kaudu OpenAI mudelile; `GET /api/v1/health` on lokaalne tervisekontroll ega kutsu OpenAI-d. Viis sünteetilist Markdown-dokumenti laaditakse käivitamisel fikseeritud classpath-manifestist mällu. Väikese ja muutumatu korpuse tõttu kasutatakse deterministlikku märksõnaotsingut, mitte embeddings'e ega vektorandmebaasi.
+
+Mudelile on allowlist'iga nähtavad ainult kaks read-only tööriista: teemade loetlemine ja teadmusbaasist otsimine. Tööriistad ei võta vastu failiteed, ei kirjuta andmeid, ei käivita käske ega kasuta võrku. Kasutaja otsingustring ei saa muuta laaditavate ressursside nimekirja.
+
+Mudelit käsitletakse ebausaldusväärse otsustajana. Ta valib suletud otsusetüübi ja praeguse päringu tööriistatulemustes olnud lõikude ID-d. Java rakendus kontrollib ID-sid uuesti kanoonilise repository vastu ja koostab avaliku vastuse täpsest teadmusbaasi tekstist. `refused:false` on võimalik ainult mitte-tühja `sources` loendiga ning vastuses on iga allika viide `[allikas: fail.md]`. Mudeli väljamõeldud proosa, failinimi või varasema päringu tõend ei pääse API vastusesse.
+
+Turvakiht töötab enne LLM-i. Bean Validation peatab tühja ja üle 2000 märgi küsimuse. Eraldi kontroll keeldub teadaolevatest prompt injection'i, rolli ümberkirjutamise, süsteemiprompti või tööriistade avaldamise, path traversal'i, destruktiivsete juhiste ning ilmsete parooli, võtme, tokeni, privaatvõtme ja isikukoodi mustritest. Süsteemiprompt, kasutajaküsimus ja sessiooniajalugu säilitavad eraldi chat-rollid. Turvalogis on ainult keeldumise kategooria ja sisendi pikkus, mitte küsimus või saladuse väärtus.
+
+Valikuline `sessionId` hoiab protsessi mälus kuni neli viimast valideeritud vahetust. Ajalugu aitab järelküsimust tõlgendada, kuid tööriist peab allikad igal korral uuesti leidma. Sessiooni ID ei ole autentimine; kontekst kaob restardil ja seda ei jagata instantside vahel.
+
+Unit-testid töötavad ilma OpenAI võtme ja võrguta ning katavad API valideerimise, turvakontrollid, KB otsingu, tööriistade allowlist'i, rollid, sessioonid ja allikate jõustamise. Eraldi `integrationTest` task katab päris REST → Spring AI → OpenAI voos API-04, UC-01–UC-13 ning SEC-01–SEC-06 ja SEC-08. Gradle loob unit- ja integratsioonitestidele eraldi HTML raportid; GitHub Actions avaldab need eraldi artefaktidena.
+
+Teadaolevad piirangud on märksõnaotsingu ja mustripõhise ründetuvastuse ebatäielikkus, OpenAI saadavus ja otsuste varieeruvus, autentimata mälusessioonid ning rate limiting'u puudumine. Need piirangud on ülesande väikese, kontrollitud skoobiga kooskõlas.
