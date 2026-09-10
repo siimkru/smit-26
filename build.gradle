@@ -1,6 +1,10 @@
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.5'
+    id 'checkstyle'
+    id 'pmd'
+    id 'com.github.spotbugs' version '6.0.14'
+    id 'jacoco'
 }
 
 group = 'ee.smit'
@@ -24,6 +28,89 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0'
+}
+
+checkstyle {
+    toolVersion = '10.12.7'
+    configFile = file('config/checkstyle/checkstyle.xml')
+}
+
+// Spring Boot's dependency graph contains the legacy google-collections
+// capability; Checkstyle only needs the maintained Guava implementation.
+configurations.named('checkstyle') {
+    exclude group: 'com.google.collections', module: 'google-collections'
+}
+
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+pmd {
+    toolVersion = '7.0.0'
+    consoleOutput = false
+    ignoreFailures = false
+    ruleSetFiles = files('config/pmd/ruleset.xml')
+    ruleSets = []
+}
+
+tasks.withType(Pmd).configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+spotbugs {
+    toolVersion = '4.8.6'
+    ignoreFailures = false
+    effort = com.github.spotbugs.snom.Effort.valueOf('DEFAULT')
+    reportLevel = com.github.spotbugs.snom.Confidence.valueOf('DEFAULT')
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+tasks.named('test', Test) {
+    finalizedBy tasks.named('jacocoTestReport')
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn tasks.named('test')
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('jacocoTestCoverageVerification')
+}
+
+tasks.named('jacocoTestCoverageVerification') {
+    dependsOn tasks.named('test')
+    violationRules {
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.70
+            }
+        }
+    }
 }
 
 sourceSets {

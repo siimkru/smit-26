@@ -1,0 +1,5 @@
+[allowlist]
+description = "Known synthetic secret fixture used to verify redacted logging"
+regexTarget = "match"
+regexes = ['''unique-test-secret-12345''']
+paths = ['''src/test/java/ee/smit/agent/security/RequestSecurityServiceTest\.java''']
