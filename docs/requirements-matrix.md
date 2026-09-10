@@ -28,7 +28,7 @@
 | Genereeritud raporteid ei commitita | `.gitignore` ignoreerib `build/` | `git check-ignore build/reports/tests/test/index.html` |
 | README sisaldab käivitamist, API-t, konfiguratsiooni, turvet, andmetöötlust, testimist ja piiranguid | `README.md` | dokumentatsiooni audit |
 | Maksimaalselt ühe lehe kokkuvõte | `docs/submission-summary.md` | dokumentatsiooni audit |
-| Lokaalsed staatilised ja katvuskontrollid | Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo `build.gradle`-is | `./gradlew check`; praegune CI neid eraldi ei käivita |
+| Staatilised ja katvuskontrollid | Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo `build.gradle`-is | `./gradlew check` lokaalselt ja CI-s |
 
 ## Kohustuslike stsenaariumide jälgitavus
 
