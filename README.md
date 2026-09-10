@@ -144,7 +144,7 @@ Workflow [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml)
 
 Kui CI saladusi ei ole, näitab integratsiooniraport vahele jäetud teste. Hindamiseks vajalik päris integratsioonijooks tuleb sel juhul teha võtmega lokaalselt või seadistada repository saladused ja käivitada workflow käsitsi. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
 
-Avaldatud workflow jooks koos mõlema HTML-artefaktiga: [GitHub Actions run 34404631418](https://github.com/siimkru/smit-26/actions/runs/34404631418). Selle jooksu unit-testid läbisid, kuid integratsiooniraport märgib kõik 21 testi vahele jäetuks, sest CI-s ei olnud OpenAI saladusi; päris mudeli tulemus on ülal dokumenteeritud lokaalne jooks.
+Avaldatud edukas workflow jooks koos mõlema HTML-artefaktiga: [GitHub Actions run 34507826365](https://github.com/siimkru/smit-26/actions/runs/34507826365). Selles jooksus läbisid nii unit-testid kui ka kõik 21 päris OpenAI integratsioonitesti.
 
 ## Teadaolevad piirangud
 
