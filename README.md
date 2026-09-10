@@ -23,6 +23,7 @@ Kohalikuks käivitamiseks on vaja Java 21. Gradle paigaldust ei ole vaja, sest r
 | `OPENAI_API_KEY` | agendipäringuks | puudub | OpenAI autentimine; võtit ei tohi reposse lisada |
 | `OPENAI_MODEL` | agendipäringuks | puudub | organisatsiooni poolt lubatud OpenAI mudeli nimi |
 | `OPENAI_TEMPERATURE` | ei | `0.2` | mudeli temperatuur |
+| `OPENAI_TIMEOUT` | ei | `30s` | OpenAI HTTP-päringu maksimaalne kestus |
 
 Fail `.env.example` sisaldab ainult ohutuid näidisväärtusi. Kopeeri see lokaalselt `.env`-iks, täida väärtused ja laadi need shelli; Spring Boot ise `.env` faili ei loe.
 
@@ -157,7 +158,7 @@ Dokumentatsioon ei fikseeri ajaloolise workflow-jooksu artefakti ega testiarve; 
 - OpenAI otsus võib mudeli ja aja lõikes erineda; rakendus piirab mõju kanoonilise, rakenduse koostatud väljundiga.
 - Sessioonid on kliendi valitud ID-ga, autentimata ja omanikuga sidumata. Sama ID teadja saab sessiooni konteksti jätkata. Need aeguvad 30 minuti tegevusetuse järel, on protsessipõhised, piiratud nelja vahetusega, kaovad restardil ja neid ei jagata instantside vahel.
 - Praeguse päringu tõendeid hoiab `ThreadLocal`, mis eeldab dokumenteeritud sünkroonset mudeli- ja tööriistavoogu samal lõimel. Asünkroonse tool calling'u lisamisel tuleb see asendada selgelt edasiantava request-scoped kontekstiga ja lisada concurrency-testid.
-- Rate limiting, mudelikõnede concurrency-limiit, rakendustaseme OpenAI timeout'id, HTTP serveri body-size'i lisapiir ning kulu- ja latentsusmõõdikud puuduvad. Ülesanne märgib rate limiting'u soovituslikuks ega nõua tootmiskõlblikku käitusinfrastruktuuri; küsimuse 2000 märgi piir jääb rakendustaseme kaitseks.
+- Rate limiting, mudelikõnede concurrency-limiit, HTTP serveri body-size'i lisapiir ning kulu- ja latentsusmõõdikud puuduvad. OpenAI HTTP-päringul on seadistatav 30-sekundiline vaike-timeout. Ülesanne märgib rate limiting'u soovituslikuks ega nõua tootmiskõlblikku käitusinfrastruktuuri; küsimuse 2000 märgi piir jääb rakendustaseme kaitseks.
 - CI eristab unit- ja integratsiooniraporteid, kuid võtmeta jooksus jäetakse päris OpenAI testid vahele ning job võib tehniliselt õnnestuda. Vahelejätmine on raportis nähtav ega tõenda live-integratsiooni edukust; hindamiseks kasutatakse dokumenteeritud võtmega jooksu.
 - CI ei sisalda eraldi sõltuvuste haavatavuse skannerit, staatilise analüüsi, automaatset sõltuvuste uuendamist ega Git-ajalugu kontrollivat secrets-skannerit. Repos on Gradle'i kaudu seadistatud Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo; need kontrollid käivituvad `./gradlew check` ajal, mitte praeguses GitHub Actionsi testitöövoos. `.gitleaks.toml` sisaldab Gitleaksi reeglistikku, kuid Gitleaksi käivitust repos seadistatud ei ole.
 - Iga Markdown-fail laaditakse ühe kanoonilise lõiguna. See on viie lühikese faili jaoks piisav, kuid pikema teadmusbaasi korral muutuksid väljavõtted liiga laiaks ning failid tuleks jagada stabiilsete ID-dega väiksemateks lõikudeks.

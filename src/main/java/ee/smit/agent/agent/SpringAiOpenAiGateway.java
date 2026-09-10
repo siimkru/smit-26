@@ -77,6 +77,7 @@ public class SpringAiOpenAiGateway implements AgentModelGateway {
                 .build();
         OpenAiChatModel model = OpenAiChatModel.builder()
                 .options(options)
+                .httpClientBuilderCustomizer(builder -> builder.timeout(properties.timeout()))
                 .build();
         return ChatClient.builder(model)
                 .defaultTools(tools)

@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SpringAiOpenAiGatewayTest {
 
     private final SpringAiOpenAiGateway gateway = new SpringAiOpenAiGateway(
-            new OpenAiAgentProperties("", "", 0.2),
+            new OpenAiAgentProperties("", "", 0.2, java.time.Duration.ofSeconds(30)),
             new AgentPromptFactory("trusted system prompt"),
             ToolCallbackProvider.from(),
             new ObjectMapper());

@@ -23,3 +23,4 @@ agent:
     api-key: ${OPENAI_API_KEY:}
     model: ${OPENAI_MODEL:}
     temperature: ${OPENAI_TEMPERATURE:0.2}
+    timeout: ${OPENAI_TIMEOUT:30s}
