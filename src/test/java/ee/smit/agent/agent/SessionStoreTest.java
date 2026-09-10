@@ -2,6 +2,8 @@ package ee.smit.agent.agent;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SessionStoreTest {
@@ -31,5 +33,18 @@ class SessionStoreTest {
                 .containsExactly("b-question");
         assertThat(store.history(null)).isEmpty();
         assertThat(store.history("missing")).isEmpty();
+    }
+
+    @Test
+    void removesSessionAfterThirtyMinutesOfInactivity() {
+        AtomicLong time = new AtomicLong();
+        SessionStore store = new SessionStore(time::get);
+        store.remember("session", new AgentExchange("question", "answer"));
+
+        time.set(SessionStore.IDLE_TIMEOUT.toNanos() - 1);
+        assertThat(store.history("session")).hasSize(1);
+
+        time.addAndGet(SessionStore.IDLE_TIMEOUT.toNanos());
+        assertThat(store.history("session")).isEmpty();
     }
 }

@@ -12,7 +12,7 @@ OpenAI mudel tagastab suletud sisemise otsuse (`ANSWER`, `LIST_TOPICS`, `CLARIFY
 
 Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratud sama 2 000 tähemärgiga nagu API küsimus.
 
-Valikuline `sessionId` hoiab kuni neli viimast valideeritud küsimuse-vastuse paari protsessi mälus. Ajalugu aitab mõista järelküsimust, kuid allikad otsitakse iga päringu ajal uuesti. Sessioon puudub pärast rakenduse restarti.
+Valikuline `sessionId` hoiab kuni neli viimast valideeritud küsimuse-vastuse paari protsessi mälus. Ajalugu aitab mõista järelküsimust, kuid allikad otsitakse iga päringu ajal uuesti. Sessioon aegub 30 minuti tegevusetuse järel ja puudub pärast rakenduse restarti.
 
 ## Eeldused ja konfiguratsioon
 
@@ -153,7 +153,7 @@ Dokumentatsioon ei fikseeri ajaloolise workflow-jooksu artefakti ega testiarve; 
 - Lahendus järgib ülesande teadlikult väikest skoopi: eesmärk ei ole täiuslik tootmissüsteem ega keerukas RAG- või käitusinfrastruktuur. Alltoodud piirangud on seetõttu dokumenteeritud, mitte varjatult tootmiskindlateks eeldatud.
 - Märksõnaotsing ja mustripõhine ründetuvastus on teadlikult lihtsad. Filter ei pruugi tuvastada kõiki parafraase, Unicode'i homoglüüfe, null-laiusega märke, kodeeritud ründeid või tundlike andmete vorme; mõju piirab mudelist sõltumatu kanoonilise väljundi kontroll.
 - OpenAI otsus võib mudeli ja aja lõikes erineda; rakendus piirab mõju kanoonilise, rakenduse koostatud väljundiga.
-- Sessioonid on kliendi valitud ID-ga, autentimata ja omanikuga sidumata. Sama ID teadja saab sessiooni konteksti jätkata; sessioonidel ei ole idle- ega absoluutset aegumist. Need on protsessipõhised, piiratud nelja vahetusega, kaovad restardil ja neid ei jagata instantside vahel.
+- Sessioonid on kliendi valitud ID-ga, autentimata ja omanikuga sidumata. Sama ID teadja saab sessiooni konteksti jätkata. Need aeguvad 30 minuti tegevusetuse järel, on protsessipõhised, piiratud nelja vahetusega, kaovad restardil ja neid ei jagata instantside vahel.
 - Praeguse päringu tõendeid hoiab `ThreadLocal`, mis eeldab dokumenteeritud sünkroonset mudeli- ja tööriistavoogu samal lõimel. Asünkroonse tool calling'u lisamisel tuleb see asendada selgelt edasiantava request-scoped kontekstiga ja lisada concurrency-testid.
 - Rate limiting, mudelikõnede concurrency-limiit, rakendustaseme OpenAI timeout'id, HTTP serveri body-size'i lisapiir ning kulu- ja latentsusmõõdikud puuduvad. Ülesanne märgib rate limiting'u soovituslikuks ega nõua tootmiskõlblikku käitusinfrastruktuuri; küsimuse 2000 märgi piir jääb rakendustaseme kaitseks.
 - CI eristab unit- ja integratsiooniraporteid, kuid võtmeta jooksus jäetakse päris OpenAI testid vahele ning job võib tehniliselt õnnestuda. Vahelejätmine on raportis nähtav ega tõenda live-integratsiooni edukust; hindamiseks kasutatakse dokumenteeritud võtmega jooksu.

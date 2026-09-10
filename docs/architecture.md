@@ -42,7 +42,7 @@ Kõik `refused:false` vastused sisaldavad vähemalt ühte allikat ning iga allik
 
 Süsteemiprompt tuleb versioonitud ressursist. Küsimus ja varasemad vahetused lisatakse Spring AI sõnumitena oma rollides ning neid ei liideta süsteemiprompti. Mudelile ei anta üldist tööriista. Rakenduse väljundipiir valideerib mudeli otsuse uuesti ja kasutab ainult sünteetilist teadmusbaasi.
 
-Valikuline `sessionId` on läbipaistmatu kontekstivõti, mitte autentimine. `SessionStore` säilitab protsessi mälus kuni neli viimast valideeritud vahetust sessiooni kohta ja piirab sessioonide koguarvu 1000-ni. Ajalugu aitab järelküsimust mõista, kuid iga vastuse tõendid otsitakse uuesti. Andmed kaovad restardil ja neid ei jagata instantside vahel.
+Valikuline `sessionId` on läbipaistmatu kontekstivõti, mitte autentimine. `SessionStore` säilitab protsessi mälus kuni neli viimast valideeritud vahetust sessiooni kohta, piirab sessioonide koguarvu 1000-ni ja eemaldab sessiooni 30 minuti tegevusetuse järel. Ajalugu aitab järelküsimust mõista, kuid iga vastuse tõendid otsitakse uuesti. Andmed kaovad restardil ja neid ei jagata instantside vahel.
 
 ## API ja vead
 
