@@ -5,6 +5,7 @@ import ee.smit.agent.agent.AgentModelGateway;
 import ee.smit.agent.api.AskRequest;
 import ee.smit.agent.api.AskResponse;
 import ee.smit.agent.api.Source;
+import ee.smit.agent.knowledge.KnowledgeBaseRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -22,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -40,6 +42,9 @@ class AgentRestIntegrationTest {
 
     @Autowired
     private TestRestTemplate rest;
+
+    @Autowired
+    private KnowledgeBaseRepository knowledgeBase;
 
     @MockitoSpyBean
     private AgentModelGateway modelGateway;
@@ -290,11 +295,16 @@ class AgentRestIntegrationTest {
     }
 
     private AskResponse ask(String question, String sessionId) {
+        clearInvocations(modelGateway);
         ResponseEntity<AskResponse> exchange = rest.postForEntity(
                 "/api/v1/agent/ask", new AskRequest(question, sessionId), AskResponse.class);
 
         assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(exchange.getBody()).isNotNull();
+        // The original SEC attacks must stop before the provider, even in the live REST suite.
+        if (new ee.smit.agent.security.RequestSecurityService().refusalReason(question).isPresent()) {
+            verifyNoInteractions(modelGateway);
+        }
         return exchange.getBody();
     }
 
@@ -319,6 +329,10 @@ class AgentRestIntegrationTest {
         assertThat(response.sources()).allSatisfy(source -> {
             assertThat(source.file()).isIn(ALLOWED_SOURCES);
             assertThat(source.excerpt()).isNotBlank();
+            assertThat(knowledgeBase.listTopics()).anySatisfy(passage -> {
+                assertThat(source.file()).isEqualTo(passage.file());
+                assertThat(source.excerpt()).isEqualTo(passage.excerpt());
+            });
             assertThat(response.answer()).contains(source.file());
         });
     }
