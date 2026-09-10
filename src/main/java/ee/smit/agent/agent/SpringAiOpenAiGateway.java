@@ -1,13 +1,12 @@
 package ee.smit.agent.agent;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,7 @@ public class SpringAiOpenAiGateway implements AgentModelGateway {
                                  ObjectMapper objectMapper) {
         this.promptFactory = promptFactory;
         this.chatClient = createClient(properties, knowledgeBaseToolCallbackProvider);
-        this.objectMapper = objectMapper.copy();
+        this.objectMapper = objectMapper.rebuild().build();
     }
 
     @Override
@@ -60,7 +59,7 @@ public class SpringAiOpenAiGateway implements AgentModelGateway {
                     .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                     .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
                     .readValue(json);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             return new AgentDecision(null, List.of(), null);
         }
     }
@@ -71,17 +70,16 @@ public class SpringAiOpenAiGateway implements AgentModelGateway {
             return null;
         }
 
-        OpenAiApi api = OpenAiApi.builder().apiKey(properties.apiKey()).build();
         OpenAiChatOptions options = OpenAiChatOptions.builder()
+                .apiKey(properties.apiKey())
                 .model(properties.model())
                 .temperature(properties.temperature())
                 .build();
         OpenAiChatModel model = OpenAiChatModel.builder()
-                .openAiApi(api)
-                .defaultOptions(options)
+                .options(options)
                 .build();
         return ChatClient.builder(model)
-                .defaultToolCallbacks(tools)
+                .defaultTools(tools)
                 .build();
     }
 }

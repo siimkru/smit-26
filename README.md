@@ -2,7 +2,7 @@
 
 See projekt on Spring Booti ja Spring AI põhine piiratud sise-IT infoagent. Agent vastab eesti keeles ainult repos olevast teadmusbaasist, kasutab OpenAI mudelit allikalõikude valimiseks ning tagastab iga toetatud vastusega kontrollitud allikad ja inimloetavad viited. Avaliku faktilise vastuse koostab Java kood kanoonilistest teadmusbaasi lõikudest; mudeli loodud faktilist proosat API-sse ei edastata.
 
-Projekt kasutab Java 21, Spring Boot 3.4.5, Spring AI 1.0.0, OpenAI mudelit ja Gradle 8.14.3 Wrapperit. Lühike tarnitav arhitektuuri- ja turvakokkuvõte on failis [docs/submission-summary.md](docs/submission-summary.md).
+Projekt kasutab Java 21, Spring Boot 4.1.1, Spring AI 2.0.1, OpenAI mudelit ja Gradle 9.1.0 Wrapperit. Lühike tarnitav arhitektuuri- ja turvakokkuvõte on failis [docs/submission-summary.md](docs/submission-summary.md).
 
 ## Arhitektuur ja valikud
 
