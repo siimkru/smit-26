@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.Normalizer;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -72,7 +74,7 @@ public class RequestSecurityService {
                     "Päring ületab lubatud pikkuse " + MAX_QUESTION_LENGTH + " tähemärki."));
         }
 
-        String normalized = normalize(question);
+        String normalized = normalize(decodePercentEncoding(question));
         if (looksLikeForbiddenPath(normalized)) {
             return Optional.of(new Violation("FORBIDDEN_PATH", "Päring üritab kasutada lubamatut failiteed."));
         }
@@ -119,7 +121,21 @@ public class RequestSecurityService {
     private String normalize(String value) {
         return Normalizer.normalize(value, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "")
+                .replaceAll("\\p{Cf}", "")
                 .toLowerCase(Locale.ROOT);
+    }
+
+    private String decodePercentEncoding(String value) {
+        String decoded = value;
+        try {
+            for (int pass = 0; pass < 2 && decoded.contains("%"); pass++) {
+                decoded = URLDecoder.decode(decoded, StandardCharsets.UTF_8);
+            }
+        } catch (IllegalArgumentException ignored) {
+            // Malformed percent encoding remains data and is handled by the
+            // remaining validation and grounding boundaries.
+        }
+        return decoded;
     }
 
     private record Violation(String category, String reason) {
