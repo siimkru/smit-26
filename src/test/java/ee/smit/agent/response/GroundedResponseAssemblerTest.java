@@ -59,6 +59,21 @@ class GroundedResponseAssemblerTest {
     }
 
     @Test
+    void recoversCompleteTopicListWhenModelDecisionIsInvalid() {
+        List<KnowledgePassage> topics = repository.listTopics();
+        Map<String, KnowledgePassage> evidence = topics.stream()
+                .collect(java.util.stream.Collectors.toMap(KnowledgePassage::id, passage -> passage));
+
+        var response = assembler.assemble("Mis teemadel saad mulle infot anda?", List.of(),
+                new AgentDecision("ANSWER", List.of(), null), evidence);
+
+        assertThat(response.refused()).isFalse();
+        assertThat(response.sources()).extracting(Source::file)
+                .containsExactlyInAnyOrderElementsOf(topics.stream()
+                        .map(KnowledgePassage::file).toList());
+    }
+
+    @Test
     void preservesEverySelectedSourceAndHumanReadableCitation() {
         KnowledgePassage kubernetes = repository.search("kubernetes").getFirst();
         KnowledgePassage cicd = repository.search("ci/cd pipeline").getFirst();

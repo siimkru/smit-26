@@ -10,6 +10,8 @@ import ee.smit.agent.response.GroundedResponseAssembler;
 import ee.smit.agent.security.RequestSecurityService;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -44,7 +46,9 @@ public class AgentOrchestrator implements AgentService {
 
         try (CurrentTurnEvidence.Turn turn = evidence.begin()) {
             var history = sessions.history(request.sessionId());
-            if (knowledgeBaseTools.searchKnowledgeBase(request.question()).isEmpty() && !history.isEmpty()) {
+            if (isTopicListQuestion(request.question())) {
+                knowledgeBaseTools.listTopics();
+            } else if (knowledgeBaseTools.searchKnowledgeBase(request.question()).isEmpty() && !history.isEmpty()) {
                 knowledgeBaseTools.searchKnowledgeBase(contextualQuery(
                         request.question(), history.getLast().question()));
             }
@@ -63,5 +67,15 @@ public class AgentOrchestrator implements AgentService {
             return question.substring(0, KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH);
         }
         return question + " " + previousQuestion.substring(0, Math.min(remaining, previousQuestion.length()));
+    }
+
+    private boolean isTopicListQuestion(String question) {
+        return normalize(question).contains("teem");
+    }
+
+    private String normalize(String value) {
+        return Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT);
     }
 }

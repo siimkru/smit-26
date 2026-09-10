@@ -90,6 +90,12 @@ public class GroundedResponseAssembler {
     private AskResponse recoverSupportedAnswer(String question, List<AgentExchange> history,
                                                 Map<String, KnowledgePassage> evidence,
                                                 String refusalReason) {
+        if (isTopicListQuestion(question)
+                && evidence.keySet().containsAll(allTopicIds)) {
+            return topicList(repository.listTopics().stream()
+                    .map(KnowledgePassage::id)
+                    .toList(), evidence);
+        }
         Set<String> eligibleIds = eligibleAnswerIds(question, history);
         List<String> evidencedEligibleIds = evidence.keySet().stream()
                 .filter(eligibleIds::contains)
