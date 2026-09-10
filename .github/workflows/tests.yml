@@ -13,11 +13,22 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
           cache: gradle
+
+      - name: Scan repository and Git history for secrets
+        uses: gitleaks/gitleaks-action@v2
+
+      - name: Scan dependency changes for known vulnerabilities
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
 
       - name: Run unit tests and static checks
         run: ./gradlew check
