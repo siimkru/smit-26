@@ -153,9 +153,17 @@ public class GroundedResponseAssembler {
         if (!isFollowUp(question) || history.isEmpty()) {
             return Set.of();
         }
-        String contextualQuery = question + " " + history.getLast().question();
+        String contextualQuery = boundedContextualQuery(question, history.getLast().question());
         return repository.search(contextualQuery).stream().map(KnowledgePassage::id)
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
+    }
+
+    private String boundedContextualQuery(String question, String previousQuestion) {
+        int remaining = KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH - question.length() - 1;
+        if (remaining <= 0) {
+            return question.substring(0, KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH);
+        }
+        return question + " " + previousQuestion.substring(0, Math.min(remaining, previousQuestion.length()));
     }
 
     private boolean isTopicListQuestion(String question) {

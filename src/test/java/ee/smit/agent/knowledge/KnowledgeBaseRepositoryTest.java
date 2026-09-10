@@ -27,6 +27,16 @@ class KnowledgeBaseRepositoryTest {
     }
 
     @Test
+    void retrievesEvidenceForAQuestionAtTheApiMaximumLength() {
+        String question = "Kuidas taotleda ligipääsu GitLabile? " + "lisainfo ".repeat(215);
+
+        assertThat(question).hasSizeLessThanOrEqualTo(2_000);
+        assertThat(repository.search(question))
+                .extracting(KnowledgePassage::file)
+                .contains("gitlab-access.md");
+    }
+
+    @Test
     void retrievesCodeReviewForIndirectMergeQuestion() {
         assertThat(repository.search("Kuidas saan koodi üle vaadata enne merge'i?"))
                 .extracting(KnowledgePassage::file)

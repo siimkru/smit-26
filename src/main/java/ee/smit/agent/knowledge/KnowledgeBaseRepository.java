@@ -23,7 +23,8 @@ import java.util.regex.Pattern;
 @Repository
 public class KnowledgeBaseRepository {
 
-    public static final int MAX_SEARCH_QUERY_LENGTH = 500;
+    /** Keep retrieval aligned with the maximum question accepted by the API. */
+    public static final int MAX_SEARCH_QUERY_LENGTH = 2_000;
 
     private static final Map<String, List<String>> MANIFEST = Map.of(
             "gitlab-access.md", List.of("gitlab", "git", "ligipaas", "access"),
