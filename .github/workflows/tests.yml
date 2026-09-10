@@ -12,8 +12,8 @@ jobs:
       contents: read
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
@@ -24,7 +24,7 @@ jobs:
 
       - name: Upload unit-test HTML report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: unit-test-html-report
           path: build/reports/tests/test/
@@ -39,7 +39,7 @@ jobs:
 
       - name: Upload integration-test HTML report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: integration-test-html-report
           path: build/reports/tests/integrationTest/
