@@ -106,6 +106,21 @@ class AgentOrchestratorTest {
         assertThat(response.sources()).isEmpty();
     }
 
+    @Test
+    void canonicalTopicEvidenceCannotGroundAnUnsupportedDetail() {
+        AgentModelGateway gateway = (question, history) -> {
+            var passage = tools.searchKnowledgeBase("gitlab").getFirst();
+            return new AgentDecision("ANSWER", List.of(passage.id()), null);
+        };
+
+        var response = service(gateway).ask(new AskRequest(
+                "Kas GitLabi ligipääsuks peab läbima polügraafi?", null));
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.sources()).isEmpty();
+        assertThat(response.answer()).doesNotContain("polügraafi", "gitlab-access.md");
+    }
+
     private AgentOrchestrator service(AgentModelGateway gateway) {
         return new AgentOrchestrator(new RequestSecurityService(), gateway, evidence,
                 assembler, new SessionStore());

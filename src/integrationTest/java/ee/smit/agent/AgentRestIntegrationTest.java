@@ -184,6 +184,24 @@ class AgentRestIntegrationTest {
     }
 
     @Test
+    @DisplayName("GROUND-01 - related GitLab topic does not support an invented fee")
+    void refusesUnsupportedFeeInsideKnownTopic() {
+        AskResponse response = askThroughRealModel("Kas GitLabi ligipääs maksab 50 eurot?");
+
+        assertRefused(response);
+        assertThat(response.answer()).doesNotContain("50 eurot", "gitlab-access.md");
+    }
+
+    @Test
+    @DisplayName("GROUND-02 - related GitLab topic does not support a polygraph requirement")
+    void refusesUnsupportedRequirementInsideKnownTopic() {
+        AskResponse response = askThroughRealModel("Kas GitLabi ligipääsuks peab läbima polügraafi?");
+
+        assertRefused(response);
+        assertThat(response.answer()).doesNotContain("polügraafi", "gitlab-access.md");
+    }
+
+    @Test
     @DisplayName("UC-13 - source follow-up returns the GitLab file and excerpt")
     void uc13AnswersSourceFollowUp() {
         String sessionId = "uc13-real-openai-session";

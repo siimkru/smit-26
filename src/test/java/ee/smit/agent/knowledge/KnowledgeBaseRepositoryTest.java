@@ -64,6 +64,24 @@ class KnowledgeBaseRepositoryTest {
     }
 
     @Test
+    void topicMatchDoesNotGroundUnsupportedGitlabConditions() {
+        assertThat(repository.search("Kas GitLabi ligipääs maksab 50 eurot?")).isEmpty();
+        assertThat(repository.search("Kas GitLabi ligipääsuks peab läbima polügraafi?")).isEmpty();
+        assertThat(repository.search(
+                "Kuidas taotleda GitLabi ligipääsu ja kas selleks peab läbima polügraafi?")).isEmpty();
+    }
+
+    @Test
+    void acceptsCuratedNaturalParaphrases() {
+        assertThat(repository.search("Kuidas GitLabi juurdepääsu saada?"))
+                .extracting(KnowledgePassage::file).contains("gitlab-access.md");
+        assertThat(repository.search("Kuidas kontrollida koodi enne ühendamist?"))
+                .extracting(KnowledgePassage::file).contains("code-review.md");
+        assertThat(repository.search("Kuidas Kubernetes kasutusele võtta?"))
+                .extracting(KnowledgePassage::file).contains("kubernetes-deploy.md");
+    }
+
+    @Test
     void allowsCicdTermWithoutTreatingItsSlashAsAFilePath() {
         assertThat(repository.search("Kuidas CI/CD pipeline töötab?"))
                 .extracting(KnowledgePassage::file)

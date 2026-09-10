@@ -97,7 +97,7 @@ Eestikeelne süsteemiprompt asub `src/main/resources/prompts/agent-system.txt`. 
 
 Enne OpenAI kutset kontrollitakse sisendi pikkust ning blokeeritakse teadaolevad prompt injection'i, rolli ümberkirjutamise, sisemiste juhiste või tööriistade avaldamise, path traversal'i, destruktiivsete juhiste ja ilmsete saladuste mustrid. Segatud õiguspärane ja ründav küsimus lükatakse tervikuna tagasi. Turvalogisse jõuavad ainult kategooria ja sisendi pikkus, mitte küsimus ega tuvastatud saladuse väärtus.
 
-Tööriistade allowlist on koodis fikseeritud. Mõlemad tööriistad loevad ainult käivitamisel laaditud staatilist teadmusbaasi, ei kirjuta andmeid, ei käivita käske ega tee väliseid päringuid. Mudeli valitud allikas peab esinema praeguse päringu tõendite hulgas ja võrduma repos laaditud kanoonilise lõiguga. `refused:false` vastus lubatakse ainult siis, kui `sources` ei ole tühi ja `answer` sisaldab iga allikafaili inimloetavat viidet.
+Tööriistade allowlist on koodis fikseeritud. Mõlemad tööriistad loevad ainult käivitamisel laaditud staatilist teadmusbaasi, ei kirjuta andmeid, ei käivita käske ega tee väliseid päringuid. Mudeli valitud allikas peab esinema praeguse päringu tõendite hulgas, võrduma repos laaditud kanoonilise lõiguga ja toetama küsimuses küsitud sisulisi detaile. Pelk teemakattuvus ei ole piisav: kui näiteks GitLabi kohta küsitud tasu või lisatingimust lõigus ei ole, keeldub rakendus vastamast. `refused:false` vastus lubatakse ainult siis, kui `sources` ei ole tühi ja `answer` sisaldab iga allikafaili inimloetavat viidet.
 
 ## Andmete töötlemine
 

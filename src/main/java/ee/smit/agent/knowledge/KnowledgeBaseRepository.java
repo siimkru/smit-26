@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -37,8 +36,31 @@ public class KnowledgeBaseRepository {
             "gitlab-access.md", List.of("gitlab"),
             "kubernetes-deploy.md", List.of("kubernetes", "k8s", "helm", "deploy", "juurutamine"),
             "cicd.md", List.of("ci/cd", "cicd", "pipeline", "deploy", "juurutamine"),
-            "code-review.md", List.of("code review", "koodireview", "merge", "pull request", "ulevaataja"),
+            "code-review.md", List.of(
+                    "code review", "koodireview", "merge", "pull request", "ulevaataja", "kontrollida", "uhendamine"),
             "access-management.md", List.of("oigused", "kasutajakonto", "roll")
+    );
+    /* Question wording is deliberately curated for this five-topic KB. Unknown
+       substantive terms must not turn a merely related topic into evidence. */
+    private static final Map<String, List<String>> SUPPORTED_ALIASES = Map.of(
+            "gitlab-access.md", List.of(
+                    "taotleda", "taotlus", "juurdepaas", "juurdepaasu", "saamine", "juhis", "juhised",
+                    "kinnitaja", "kinnitab", "kinnitus", "kestus", "kaua", "aeg", "paev", "paeva"),
+            "kubernetes-deploy.md", List.of(
+                    "kasutusele votmine", "votta", "paigaldamine", "protsess", "juhis", "juhised"),
+            "cicd.md", List.of(
+                    "kasutusele votmine", "paigaldamine", "protsess", "tootab", "juhis", "juhised"),
+            "code-review.md", List.of(
+                    "koodi ulevaatus", "ule vaatama", "vaadata", "kontrollima", "kontrollida",
+                    "uhendamine", "uhendamist", "juhis", "juhised"),
+            "access-management.md", List.of(
+                    "juurdepaas", "ligipaas", "taotleda", "taotlus", "saamine", "juhis", "juhised")
+    );
+    private static final Set<String> QUESTION_FRAMING = Set.of(
+            "aga", "aega", "andke", "anna", "do", "enne", "get", "how", "i", "info", "jarel",
+            "iga", "kaib", "kas", "kaudu", "kes", "kui", "kuidas", "kust", "ma", "mis", "mulle", "mul", "on",
+            "palun", "parast", "peab", "probleem", "protsess", "saan", "saab", "saada", "see", "seda",
+            "selle", "sellest", "teha", "toimub", "ule", "vajaksin", "vaja", "voi", "votab", "lisainfo"
     );
 
     private static final List<String> FILE_ORDER = List.of(
@@ -83,13 +105,18 @@ public class KnowledgeBaseRepository {
             return List.of();
         }
 
-        return documents.stream()
-                .map(document -> new ScoredPassage(document.passage(), score(document, queryTokens)))
+        List<ScoredPassage> related = documents.stream()
+                .map(document -> new ScoredPassage(document, score(document, queryTokens)))
                 .filter(result -> result.score() > 0)
+                .toList();
+        if (!fullySupports(related.stream().map(ScoredPassage::document).toList(), queryTokens)) {
+            return List.of();
+        }
+        return related.stream()
                 .sorted(Comparator.comparingInt(ScoredPassage::score).reversed()
-                        .thenComparing(result -> result.passage().file()))
+                        .thenComparing(result -> result.document().passage().file()))
                 .limit(5)
-                .map(ScoredPassage::passage)
+                .map(result -> result.document().passage())
                 .toList();
     }
 
@@ -137,6 +164,20 @@ public class KnowledgeBaseRepository {
         return score;
     }
 
+    private boolean fullySupports(List<Document> relatedDocuments, Set<String> queryTokens) {
+        if (relatedDocuments.isEmpty()) {
+            return false;
+        }
+        Set<String> supported = new java.util.LinkedHashSet<>();
+        for (Document document : relatedDocuments) {
+            supported.addAll(document.tokens());
+            supported.addAll(tokens(String.join(" ", SUPPORTED_ALIASES.get(document.passage().file()))));
+        }
+        return queryTokens.stream()
+                .filter(token -> !QUESTION_FRAMING.contains(token))
+                .allMatch(queryToken -> supported.stream().anyMatch(term -> matches(term, queryToken)));
+    }
+
     private boolean matches(String documentToken, String queryToken) {
         return documentToken.equals(queryToken) || stem(documentToken).equals(stem(queryToken));
     }
@@ -144,7 +185,7 @@ public class KnowledgeBaseRepository {
     /* Small, predictable normalization for common Estonian case endings; this
        is intentionally not a general language-processing dependency. */
     private String stem(String token) {
-        return token.replaceFirst("(idele|idega|isse|ist|ile|iga|i)$", "");
+        return token.replaceFirst("(miseks|mise|idele|idega|esse|asse|usse|isse|uks|ust|ast|est|ist|ile|iga|id|it|at|st|lt|le|ga|i)$", "");
     }
 
     private boolean looksLikePath(String value) {
@@ -173,6 +214,6 @@ public class KnowledgeBaseRepository {
     private record Document(KnowledgePassage passage, Set<String> tokens, Set<String> anchors) {
     }
 
-    private record ScoredPassage(KnowledgePassage passage, int score) {
+    private record ScoredPassage(Document document, int score) {
     }
 }

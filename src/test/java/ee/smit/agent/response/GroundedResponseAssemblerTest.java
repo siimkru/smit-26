@@ -116,6 +116,23 @@ class GroundedResponseAssemblerTest {
     }
 
     @Test
+    void refusesCanonicalTopicEvidenceThatDoesNotSupportRequestedDetails() {
+        KnowledgePassage passage = repository.search("gitlab").getFirst();
+
+        for (String question : List.of(
+                "Kas GitLabi ligipääs maksab 50 eurot?",
+                "Kas GitLabi ligipääsuks peab läbima polügraafi?")) {
+            var response = assembler.assemble(question, List.of(),
+                    new AgentDecision("ANSWER", List.of(passage.id()), null),
+                    Map.of(passage.id(), passage));
+
+            assertThat(response.refused()).isTrue();
+            assertThat(response.sources()).isEmpty();
+            assertThat(response.answer()).doesNotContain("50 eurot", "polügraafi", "gitlab-access.md");
+        }
+    }
+
+    @Test
     void rejectsTamperedEvidenceEvenWhenItsIdIsCanonical() {
         KnowledgePassage canonical = repository.search("gitlab").getFirst();
         KnowledgePassage tampered = new KnowledgePassage(
