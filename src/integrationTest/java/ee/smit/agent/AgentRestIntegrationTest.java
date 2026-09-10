@@ -12,6 +12,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "agent.openai.temperature=1.0")
+@AutoConfigureTestRestTemplate
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+", disabledReason = "OPENAI_API_KEY puudub")
 @EnabledIfEnvironmentVariable(named = "OPENAI_MODEL", matches = ".+", disabledReason = "OPENAI_MODEL puudub")
 class AgentRestIntegrationTest {
