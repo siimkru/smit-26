@@ -148,8 +148,13 @@ Avaldatud edukas workflow jooks koos mõlema HTML-artefaktiga: [GitHub Actions r
 
 ## Teadaolevad piirangud
 
-- Märksõnaotsing ja mustripõhine ründetuvastus on teadlikult lihtsad ning ei tunne kõiki parafraase või tundlike andmete vorme.
+- Lahendus järgib ülesande teadlikult väikest skoopi: eesmärk ei ole täiuslik tootmissüsteem ega keerukas RAG- või käitusinfrastruktuur. Alltoodud piirangud on seetõttu dokumenteeritud, mitte varjatult tootmiskindlateks eeldatud.
+- Märksõnaotsing ja mustripõhine ründetuvastus on teadlikult lihtsad. Filter ei pruugi tuvastada kõiki parafraase, Unicode'i homoglüüfe, null-laiusega märke, kodeeritud ründeid või tundlike andmete vorme; mõju piirab mudelist sõltumatu kanoonilise väljundi kontroll.
 - OpenAI otsus võib mudeli ja aja lõikes erineda; rakendus piirab mõju kanoonilise, rakenduse koostatud väljundiga.
-- Sessioonid on autentimata, protsessipõhised, kuni nelja vahetusega ja kaovad restardil; mitme instantsi vahel konteksti ei jagata.
-- Rate limiting puudub, sest ülesanne märgib selle soovituslikuks.
+- Sessioonid on kliendi valitud ID-ga, autentimata ja omanikuga sidumata. Sama ID teadja saab sessiooni konteksti jätkata; sessioonidel ei ole idle- ega absoluutset aegumist. Need on protsessipõhised, piiratud nelja vahetusega, kaovad restardil ja neid ei jagata instantside vahel.
+- Praeguse päringu tõendeid hoiab `ThreadLocal`, mis eeldab dokumenteeritud sünkroonset mudeli- ja tööriistavoogu samal lõimel. Asünkroonse tool calling'u lisamisel tuleb see asendada selgelt edasiantava request-scoped kontekstiga ja lisada concurrency-testid.
+- Rate limiting, mudelikõnede concurrency-limiit, rakendustaseme OpenAI timeout'id, HTTP serveri body-size'i lisapiir ning kulu- ja latentsusmõõdikud puuduvad. Ülesanne märgib rate limiting'u soovituslikuks ega nõua tootmiskõlblikku käitusinfrastruktuuri; küsimuse 2000 märgi piir jääb rakendustaseme kaitseks.
+- CI eristab unit- ja integratsiooniraporteid, kuid võtmeta jooksus jäetakse päris OpenAI testid vahele ning job võib tehniliselt õnnestuda. Vahelejätmine on raportis nähtav ega tõenda live-integratsiooni edukust; hindamiseks kasutatakse dokumenteeritud võtmega jooksu.
+- CI ei sisalda eraldi sõltuvuste haavatavuse skannerit, staatilist analüüsi, automaatset sõltuvuste uuendamist ega Git-ajalugu kontrollivat secrets-skannerit. Ülesanne nõuab test workflow'd ja raportiartefakte, mitte neid tootmisprotsessi kontrolle.
+- Iga Markdown-fail laaditakse ühe kanoonilise lõiguna. See on viie lühikese faili jaoks piisav, kuid pikema teadmusbaasi korral muutuksid väljavõtted liiga laiaks ning failid tuleks jagada stabiilsete ID-dega väiksemateks lõikudeks.
 - Rakendus sõltub agendipäringute ajal OpenAI saadavusest ning integratsioonitestid tarbivad päris API krediiti.

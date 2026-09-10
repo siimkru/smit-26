@@ -30,6 +30,8 @@ Teadmusbaas on väike ja staatiline, seega kasutab `KnowledgeBaseRepository` nor
 
 Mudel ei koosta avalikku vastust. Ta tagastab `AgentDecision` objekti, mille action on `ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`, ning valib tööriistatulemustes olnud lõikude ID-d. `CurrentTurnEvidence` kogub ainult sama päringu jooksul tagastatud kanoonilised lõigud. `GroundedResponseAssembler` kontrollib ID-sid repository vastu, kontrollib nende sobivust küsimusega ning ehitab vastuse täpsest lõigutekstist. Seetõttu ei saa mudeli väljamõeldud allikas ega faktiline proosa avalikku API vastusesse jõuda.
 
+`CurrentTurnEvidence` kasutab `ThreadLocal`-it ning tugineb rakenduse praegusele sünkroonsele eeldusele, et orkestreerimine, mudelikõne ja tööriistakutsed täidetakse sama päringulõime kontekstis. Asünkroonse tööriistatäitmise korral ei ole see eeldus piisav: siis tuleb tõendikontekst muuta eksplitsiitselt request-scoped'iks ning kontrollida paralleelpäringute isolatsiooni eraldi testidega.
+
 Kõik `refused:false` vastused sisaldavad vähemalt ühte allikat ning iga allikas on vastuses kujul `[allikas: fail.md]`. Toetuseta, skoopiväline, ohtlik või vigaselt maandatud otsus muutub rakenduse koostatud eestikeelseks keeldumiseks.
 
 ## Turvapiirid
@@ -51,4 +53,4 @@ Valikuline `sessionId` on läbipaistmatu kontekstivõti, mitte autentimine. `Ses
 
 `test` task katab rakenduse enda loogika ilma võtme või võrguta. `integrationTest` käivitab päris REST → Spring AI → OpenAI voo ja vajab `OPENAI_API_KEY` ning `OPENAI_MODEL` väärtusi. Mõlemal taskil on eraldi HTML raport. GitHub Actions avaldab need eraldi artefaktidena ka ebaõnnestumise korral; võtmeta integratsiooniraport näitab teste vahele jäetuna.
 
-Rate limiting, püsiv andmebaas, autentimisplatvorm, väline otsing, streaming, mitme instantsi koordineerimine ja deployment-infrastruktuur jäävad välja, sest ülesanne neid ei nõua.
+Rate limiting, mudelikõnede concurrency- ja timeout-piirid, operatiivmõõdikud, sõltuvus- ja staatilise analüüsi skannerid, püsiv andmebaas, autentimisplatvorm, väline otsing, streaming, mitme instantsi koordineerimine ja deployment-infrastruktuur jäävad välja, sest ülesanne eelistab väikest lahendust ega nõua tootmiskõlblikku infrastruktuuri. Samal põhjusel vastab üks Markdown-fail ühele lõigule; suurema korpuse korral vajaks otsing heading'u- või lõigupõhist tükeldamist.
