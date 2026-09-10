@@ -26,6 +26,8 @@ Paketid eraldavad API, agendi orkestreerimise, sisenditurbe, teadmusbaasi ja ava
 
 Teadmusbaas on väike ja staatiline, seega kasutab `KnowledgeBaseRepository` normaliseeritud märksõna- ja aliaseotsingut. Embeddings, vektorandmebaas ja väline otsing ei annaks ülesande kohustuslikele kasutusjuhtudele vajalikku lisaväärtust.
 
+Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratud 2 000 tähemärgiga. Repository ei aktsepteeri küsimust tõendina ainult teema kattumise põhjal: kõik sisulised terminid peavad olema seotud leitud lõikudega või curated aliastega. Seetõttu lükatakse tagasi ka teadaoleva teema kohta esitatud, kuid dokumendis toetamata detailiküsimused.
+
 `KnowledgeBaseTools` eksponeerib Spring AI-le ainult `listTopics` ja `searchKnowledgeBase`. Otsinguargument on andmestring, mitte failitee. Repository avab ainult manifestis nimetatud classpath-ressursid; tööriistadel puuduvad võrgu-, kirjutamis- ja käsuvõimed.
 
 Mudel ei koosta avalikku vastust. Ta tagastab `AgentDecision` objekti, mille action on `ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`, ning valib tööriistatulemustes olnud lõikude ID-d. `CurrentTurnEvidence` kogub ainult sama päringu jooksul tagastatud kanoonilised lõigud. `GroundedResponseAssembler` kontrollib ID-sid repository vastu, kontrollib nende sobivust küsimusega ning ehitab vastuse täpsest lõigutekstist. Seetõttu ei saa mudeli väljamõeldud allikas ega faktiline proosa avalikku API vastusesse jõuda.
@@ -51,6 +53,8 @@ Valikuline `sessionId` on läbipaistmatu kontekstivõti, mitte autentimine. `Ses
 
 ## Testi- ja CI-piir
 
-`test` task katab rakenduse enda loogika ilma võtme või võrguta. `integrationTest` käivitab päris REST → Spring AI → OpenAI voo ja vajab `OPENAI_API_KEY` ning `OPENAI_MODEL` väärtusi. Mõlemal taskil on eraldi HTML raport. GitHub Actions avaldab need eraldi artefaktidena ka ebaõnnestumise korral; võtmeta integratsiooniraport näitab teste vahele jäetuna.
+`test` task katab rakenduse enda loogika ilma võtme või võrguta. `integrationTest` käivitab päris REST → Spring AI → OpenAI voo ja vajab `OPENAI_API_KEY` ning `OPENAI_MODEL` väärtusi. Integratsioonitestid katavad lisaks kasutusjuhtudele `GROUND-01` ja `GROUND-02`, mis kontrollivad toetamata detailide tagasilükkamist. Mõlemal taskil on eraldi HTML raport. GitHub Actions avaldab need eraldi artefaktidena ka ebaõnnestumise korral; võtmeta integratsiooniraport näitab teste vahele jäetuna.
 
-Rate limiting, mudelikõnede concurrency- ja timeout-piirid, operatiivmõõdikud, sõltuvus- ja staatilise analüüsi skannerid, püsiv andmebaas, autentimisplatvorm, väline otsing, streaming, mitme instantsi koordineerimine ja deployment-infrastruktuur jäävad välja, sest ülesanne eelistab väikest lahendust ega nõua tootmiskõlblikku infrastruktuuri. Samal põhjusel vastab üks Markdown-fail ühele lõigule; suurema korpuse korral vajaks otsing heading'u- või lõigupõhist tükeldamist.
+Gradle'is on lisaks seadistatud Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo; `./gradlew check` käivitab need kontrollid ning nõuab vähemalt 70% ridade katvust. Praegune GitHub Actionsi töövoog käivitab ainult `test` ja `integrationTest`, seega ei ole staatilised kontrollid CI-s eraldi jõustatud.
+
+Rate limiting, mudelikõnede concurrency- ja timeout-piirid, operatiivmõõdikud ning CI-s eraldi käivitatavad sõltuvus- ja staatilise analüüsi skannerid jäävad välja, sest ülesanne eelistab väikest lahendust ega nõua tootmiskõlblikku infrastruktuuri. Gradle'i lokaalsed Checkstyle-, PMD-, SpotBugs/FindSecBugs- ja JaCoCo-kontrollid on siiski olemas. Püsiv andmebaas, autentimisplatvorm, väline otsing, streaming, mitme instantsi koordineerimine ja deployment-infrastruktuur jäävad samuti välja. Samal põhjusel vastab üks Markdown-fail ühele lõigule; suurema korpuse korral vajaks otsing heading'u- või lõigupõhist tükeldamist.

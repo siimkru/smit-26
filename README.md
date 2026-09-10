@@ -10,6 +10,8 @@ Projekt kasutab Java 21, Spring Boot 3.4.5, Spring AI 1.0.0, OpenAI mudelit ja G
 
 OpenAI mudel tagastab suletud sisemise otsuse (`ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`) ja valitud lõikude ID-d. Rakendus lubab ainult sama päringu tööriistakutsetega saadud kanoonilisi ID-sid, kontrollib nende seost küsimusega ning koostab `answer`-i, `sources`-i, viited ja usaldustaseme ise. Staatiline märksõnaotsing sobib viie väikese dokumendi jaoks ja hoiab lahenduse auditeeritavana; vektorandmebaas ja embeddings ei ole selle ülesande jaoks vajalikud.
 
+Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratud sama 2 000 tähemärgiga nagu API küsimus.
+
 Valikuline `sessionId` hoiab kuni neli viimast valideeritud küsimuse-vastuse paari protsessi mälus. Ajalugu aitab mõista järelküsimust, kuid allikad otsitakse iga päringu ajal uuesti. Sessioon puudub pärast rakenduse restarti.
 
 ## Eeldused ja konfiguratsioon
@@ -99,6 +101,8 @@ Enne OpenAI kutset kontrollitakse sisendi pikkust ning blokeeritakse teadaolevad
 
 Tööriistade allowlist on koodis fikseeritud. Mõlemad tööriistad loevad ainult käivitamisel laaditud staatilist teadmusbaasi, ei kirjuta andmeid, ei käivita käske ega tee väliseid päringuid. Mudeli valitud allikas peab esinema praeguse päringu tõendite hulgas, võrduma repos laaditud kanoonilise lõiguga ja toetama küsimuses küsitud sisulisi detaile. Pelk teemakattuvus ei ole piisav: kui näiteks GitLabi kohta küsitud tasu või lisatingimust lõigus ei ole, keeldub rakendus vastamast. `refused:false` vastus lubatakse ainult siis, kui `sources` ei ole tühi ja `answer` sisaldab iga allikafaili inimloetavat viidet.
 
+Küsimuse detailitaseme maandamine tähendab, et seotud teema leidmine üksi ei anna vastamiseks piisavat alust. Näiteks GitLabi dokument ei toeta vastust tasu või polügraafinõude kohta, kui sellist detaili lõigus ei ole.
+
 ## Andmete töötlemine
 
 Aktsepteeritud küsimus saadetakse OpenAI-le koos süsteemiprompti ja kahe lubatud tööriista skeemidega. Tööriista kasutamisel saadetakse mudelile ka sünteetilise teadmusbaasi vastavad lõigud. Kui klient kasutab `sessionId`-d, võidakse kuni neli varasemat aktsepteeritud küsimust ja valideeritud vastust saata järelküsimuse kontekstina uuesti OpenAI-le. OpenAI API võtit kasutatakse teenusega autentimiseks; seda ei lisata prompti, vastusesse ega rakenduse logidesse.
@@ -113,7 +117,7 @@ Unit-testid ei vaja OpenAI võtit ega tee päris võrgukutseid:
 env -u OPENAI_API_KEY -u OPENAI_MODEL ./gradlew test
 ```
 
-Need katavad sisendi valideerimise ja turvafiltri, API-01, API-02, API-03 ja SEC-07, teadmusbaasi otsingu, tööriistade allowlist'i ja path traversal'i tõkestamise, süsteemi- ja kasutajarollide eralduse, sessioonikonteksti ning allikate ja viidete rakendustaseme kontrolli.
+Need katavad sisendi valideerimise ja turvafiltri, API-01, API-02, API-03 ja SEC-07, teadmusbaasi otsingu, küsimuse detailitaseme maandamise, tööriistade allowlist'i ja path traversal'i tõkestamise, süsteemi- ja kasutajarollide eralduse, sessioonikonteksti ning allikate ja viidete rakendustaseme kontrolli.
 
 Päris integratsioonitestid käivad eraldi lähtekogumi ja taskiga ning vajavad `OPENAI_API_KEY` ja `OPENAI_MODEL` väärtusi:
 
@@ -124,7 +128,7 @@ set +a
 ./gradlew integrationTest
 ```
 
-Testid käivitavad rakenduse juhuslikul lokaalsel pordil ja läbivad REST → agent → Spring AI → OpenAI voo. Kaetud on API-04, UC-01–UC-13 ning SEC-01–SEC-06 ja SEC-08. Väited kontrollivad stabiilseid käitumisinvariante, allikafaile ja keeldumisi, mitte mudeli sõnastust. SEC-07 on võtmeta API-test, sest liiga pikk sisend peab peatuma enne mudelikõnet. Kui võti või mudel puudub, märgitakse integratsiooniklass vahele jäetuks; seda ei loeta päris mudeliga edukaks jooksuks.
+Testid käivitavad rakenduse juhuslikul lokaalsel pordil ja läbivad REST → agent → Spring AI → OpenAI voo. Kaetud on API-04, UC-01–UC-13, GROUND-01–GROUND-02 ning SEC-01–SEC-06 ja SEC-08. Väited kontrollivad stabiilseid käitumisinvariante, allikafaile ja keeldumisi, mitte mudeli sõnastust. SEC-07 on võtmeta API-test, sest liiga pikk sisend peab peatuma enne mudelikõnet. Kui võti või mudel puudub, märgitakse integratsiooniklass vahele jäetuks; seda ei loeta päris mudeliga edukaks jooksuks.
 
 Gradle genereerib eraldi inimloetavad HTML raportid:
 
@@ -133,18 +137,16 @@ Gradle genereerib eraldi inimloetavad HTML raportid:
 
 `build/` on `.gitignore`-is ning genereeritud raporteid ei commitita.
 
-Viimane lokaalne kontroll 10.09.2026: 61 unit-testi läbis võtmeta ning 21 integratsioonitesti läbis päris OpenAI võtmega; vahele jäetud, ebaõnnestunud ja veaga teste oli 0.
+Testitulemuste arv sõltub testide ja parameetrite hetkeversioonist; reprodutseeritava tulemuse saamiseks käivita ülaltoodud käsud ja ava vastav HTML-raport.
 
 ## GitHub Actions ja testiraportid
 
 Workflow [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml) käivitab push'i, pull request'i ja käsitsi käivitamise korral alati unit-testid. Seejärel käivitab ta integratsioonitask'i; päris OpenAI testid aktiveeruvad ainult siis, kui GitHubis on `OPENAI_API_KEY` secret ning `OPENAI_MODEL` secret või repository variable. Mõlemad raportid laaditakse üles ka testitask'i ebaõnnestumise korral eraldi artefaktidena:
 
-- [unit-test-html-report](https://github.com/siimkru/smit-26/actions/runs/34513822467/artifacts/10166875165)
-- [integration-test-html-report](https://github.com/siimkru/smit-26/actions/runs/34513822467/artifacts/10167022715)
 
 Kui CI saladusi ei ole, näitab integratsiooniraport vahele jäetud teste. Hindamiseks vajalik päris integratsioonijooks tuleb sel juhul teha võtmega lokaalselt või seadistada repository saladused ja käivitada workflow käsitsi. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
 
-Avaldatud edukas workflow jooks koos mõlema HTML-artefaktiga: [GitHub Actions run 34513822467](https://github.com/siimkru/smit-26/actions/runs/34513822467). Selles jooksus läbisid kõik 61 unit-testi ja kõik 21 päris OpenAI integratsioonitesti; vahele jäetud, ebaõnnestunud ja veaga teste oli 0.
+Dokumentatsioon ei fikseeri ajaloolise workflow-jooksu artefakti ega testiarve; GitHub Actionsi värskeim jooks ja selle artefaktid on workflow vaates nähtavad.
 
 ## Teadaolevad piirangud
 
@@ -155,6 +157,6 @@ Avaldatud edukas workflow jooks koos mõlema HTML-artefaktiga: [GitHub Actions r
 - Praeguse päringu tõendeid hoiab `ThreadLocal`, mis eeldab dokumenteeritud sünkroonset mudeli- ja tööriistavoogu samal lõimel. Asünkroonse tool calling'u lisamisel tuleb see asendada selgelt edasiantava request-scoped kontekstiga ja lisada concurrency-testid.
 - Rate limiting, mudelikõnede concurrency-limiit, rakendustaseme OpenAI timeout'id, HTTP serveri body-size'i lisapiir ning kulu- ja latentsusmõõdikud puuduvad. Ülesanne märgib rate limiting'u soovituslikuks ega nõua tootmiskõlblikku käitusinfrastruktuuri; küsimuse 2000 märgi piir jääb rakendustaseme kaitseks.
 - CI eristab unit- ja integratsiooniraporteid, kuid võtmeta jooksus jäetakse päris OpenAI testid vahele ning job võib tehniliselt õnnestuda. Vahelejätmine on raportis nähtav ega tõenda live-integratsiooni edukust; hindamiseks kasutatakse dokumenteeritud võtmega jooksu.
-- CI ei sisalda eraldi sõltuvuste haavatavuse skannerit, staatilist analüüsi, automaatset sõltuvuste uuendamist ega Git-ajalugu kontrollivat secrets-skannerit. Ülesanne nõuab test workflow'd ja raportiartefakte, mitte neid tootmisprotsessi kontrolle.
+- CI ei sisalda eraldi sõltuvuste haavatavuse skannerit, staatilise analüüsi, automaatset sõltuvuste uuendamist ega Git-ajalugu kontrollivat secrets-skannerit. Repos on Gradle'i kaudu seadistatud Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo; need kontrollid käivituvad `./gradlew check` ajal, mitte praeguses GitHub Actionsi testitöövoos. `.gitleaks.toml` sisaldab Gitleaksi reeglistikku, kuid Gitleaksi käivitust repos seadistatud ei ole.
 - Iga Markdown-fail laaditakse ühe kanoonilise lõiguna. See on viie lühikese faili jaoks piisav, kuid pikema teadmusbaasi korral muutuksid väljavõtted liiga laiaks ning failid tuleks jagada stabiilsete ID-dega väiksemateks lõikudeks.
 - Rakendus sõltub agendipäringute ajal OpenAI saadavusest ning integratsioonitestid tarbivad päris API krediiti.
