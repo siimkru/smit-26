@@ -1,5 +1,6 @@
 package ee.smit.agent.agent;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import ee.smit.agent.api.AskRequest;
 import ee.smit.agent.api.AskResponse;
 import ee.smit.agent.knowledge.CurrentTurnEvidence;
@@ -21,6 +22,8 @@ public class AgentOrchestrator implements AgentService {
     private final GroundedResponseAssembler responses;
     private final SessionStore sessions;
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+            justification = "Spring owns and injects this singleton dependency.")
     public AgentOrchestrator(RequestSecurityService security, AgentModelGateway model,
                              CurrentTurnEvidence evidence, KnowledgeBaseTools knowledgeBaseTools,
                              GroundedResponseAssembler responses, SessionStore sessions) {

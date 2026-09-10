@@ -12,7 +12,7 @@ import java.util.function.LongSupplier;
 
 /** Small, bounded, in-memory context store. Session content is context, never evidence. */
 @Component
-public class SessionStore {
+public final class SessionStore {
 
     static final int MAX_EXCHANGES = 4;
     static final int MAX_SESSIONS = 1_000;
