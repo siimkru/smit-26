@@ -139,12 +139,12 @@ Viimane lokaalne kontroll 10.09.2026: 61 unit-testi läbis võtmeta ning 21 inte
 
 Workflow [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml) käivitab push'i, pull request'i ja käsitsi käivitamise korral alati unit-testid. Seejärel käivitab ta integratsioonitask'i; päris OpenAI testid aktiveeruvad ainult siis, kui GitHubis on `OPENAI_API_KEY` secret ning `OPENAI_MODEL` secret või repository variable. Mõlemad raportid laaditakse üles ka testitask'i ebaõnnestumise korral eraldi artefaktidena:
 
-- `unit-test-html-report`
-- `integration-test-html-report`
+- [unit-test-html-report](https://github.com/siimkru/smit-26/actions/runs/34513822467/artifacts/10166875165)
+- [integration-test-html-report](https://github.com/siimkru/smit-26/actions/runs/34513822467/artifacts/10167022715)
 
 Kui CI saladusi ei ole, näitab integratsiooniraport vahele jäetud teste. Hindamiseks vajalik päris integratsioonijooks tuleb sel juhul teha võtmega lokaalselt või seadistada repository saladused ja käivitada workflow käsitsi. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
 
-Avaldatud edukas workflow jooks koos mõlema HTML-artefaktiga: [GitHub Actions run 34507826365](https://github.com/siimkru/smit-26/actions/runs/34507826365). Selles jooksus läbisid nii unit-testid kui ka kõik 21 päris OpenAI integratsioonitesti.
+Avaldatud edukas workflow jooks koos mõlema HTML-artefaktiga: [GitHub Actions run 34513822467](https://github.com/siimkru/smit-26/actions/runs/34513822467). Selles jooksus läbisid kõik 61 unit-testi ja kõik 21 päris OpenAI integratsioonitesti; vahele jäetud, ebaõnnestunud ja veaga teste oli 0.
 
 ## Teadaolevad piirangud
 
