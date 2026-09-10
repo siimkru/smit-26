@@ -8,6 +8,7 @@ import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** Deterministic checks run before any user text can be sent to OpenAI. */
@@ -22,18 +23,18 @@ public class RequestSecurityService {
             Pattern.compile("\\b(?:ignoreeri|eira|unusta)\\s+(?:(?:koik[a-z]*|oma|eelmis[a-z]*)\\s+){0,4}(?:reegl[a-z]*|juhis[a-z]*)\\b"),
             Pattern.compile("\\b(?:you are now|act as|pretend to be|sa oled nuud|kaitu nagu|dan)\\b"),
             Pattern.compile("(?:^|\\s|[<\\[])(?:system|assistant|developer)\\s*(?::|>|\\])"),
-            Pattern.compile("\\b(?:override|rewrite|replace|change|disable|bypass)\\b.{0,100}\\b(?:system prompt|instructions|rules|tools|safeguards|restrictions)\\b"),
-            Pattern.compile("\\b(?:kirjuta umber|muuda|asenda|keela|hiili mooda)\\b.{0,100}\\b(?:susteemiprompt[a-z]*|juhis[a-z]*|reegl[a-z]*|tooriist[a-z]*|piirang[a-z]*)\\b"),
-            Pattern.compile("\\b(?:kirjuta|seadista|defineeri)\\b.{0,80}\\b(?:susteemiprompt[a-z]*|prompt[a-z]*|juhis[a-z]*|reegl[a-z]*|tooriist[a-z]*)\\b.{0,30}\\b(?:umber|uuesti)\\b"),
+            Pattern.compile("\\b(?:override|rewrite|replace|change|disable|bypass)\\b[^\\r\\n]{0,100}\\b(?:system prompt|instructions|rules|tools|safeguards|restrictions)\\b"),
+            Pattern.compile("\\b(?:kirjuta umber|muuda|asenda|keela|hiili mooda)\\b[^\\r\\n]{0,100}\\b(?:susteemiprompt[a-z]*|juhis[a-z]*|reegl[a-z]*|tooriist[a-z]*|piirang[a-z]*)\\b"),
+            Pattern.compile("\\b(?:kirjuta|seadista|defineeri)\\b[^\\r\\n]{0,80}\\b(?:susteemiprompt[a-z]*|prompt[a-z]*|juhis[a-z]*|reegl[a-z]*|tooriist[a-z]*)\\b[^\\r\\n]{0,30}\\b(?:umber|uuesti)\\b"),
             Pattern.compile("\\b(?:system prompt|internal instructions|available tools|tool definitions|susteemiprompt[a-z]*|sisemis[a-z]* juhis[a-z]*|tooriist[a-z]* definitsioon[a-z]*)\\b"),
-            Pattern.compile("\\b(?:what|which|millis[a-z]*)\\b.{0,60}\\b(?:tools|tooriist[a-z]*)\\b.{0,40}\\b(?:call|use|kasuta|kutsu)[a-z]*\\b"),
-            Pattern.compile("\\b(?:repeat|print|show|reveal|return|list|korda|avalda|naita|tagasta|loetle)\\b.{0,160}\\b(?:messages sent before|messages.{0,40}before|sonum[a-z]*.{0,40}enne|before my question|koik sonumid|enne minu kusimust|system prompt|available tools|tool definitions|susteemiprompt[a-z]*|tooriist[a-z]*)\\b")
+            Pattern.compile("\\b(?:what|which|millis[a-z]*)\\b[^\\r\\n]{0,60}\\b(?:tools|tooriist[a-z]*)\\b[^\\r\\n]{0,40}\\b(?:call|use|kasuta|kutsu)[a-z]*\\b"),
+            Pattern.compile("\\b(?:repeat|print|show|reveal|return|list|korda|avalda|naita|tagasta|loetle)\\b[^\\r\\n]{0,160}\\b(?:messages sent before|messages[^\\r\\n]{0,40}before|sonum[a-z]*[^\\r\\n]{0,40}enne|before my question|koik sonumid|enne minu kusimust|system prompt|available tools|tool definitions|susteemiprompt[a-z]*|tooriist[a-z]*)\\b")
     );
     private static final List<Pattern> SECRET_VALUE_PATTERNS = List.of(
             Pattern.compile("\\bsk-[A-Za-z0-9_-]{16,}\\b"),
             Pattern.compile("\\bAKIA[0-9A-Z]{16}\\b"),
             Pattern.compile("\\bgh[pousr]_[A-Za-z0-9]{20,}\\b"),
-            Pattern.compile("-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----"),
+            Pattern.compile("-----BEGIN [A-Z ]{0,40}PRIVATE KEY-----"),
             Pattern.compile("\\bBearer\\s+[A-Za-z0-9._~+/=-]{12,}\\b", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(?<!\\d)\\d{11}(?!\\d)")
     );
@@ -43,12 +44,13 @@ public class RequestSecurityService {
     private static final Pattern LABELED_PERSONAL_ID = Pattern.compile(
             "\\b(?:isikukood|personal code|national id)\\s*(?::|=|\\bon\\b|\\bis\\b)?"
                     + "\\s*[0-9][0-9 -]{9,15}[0-9]\\b");
-    private static final Pattern SENSITIVE_REQUEST = Pattern.compile(
-            "\\b(?:give|show|reveal|return|find|list|anna|naita|avalda|tagasta|otsi|mis on|what is)\\b.{0,100}"
-                    + "\\b(?:(?:administrator|administraator|admin)[a-z]*\\s+)?"
-                    + "(?:password|passwd|parool|api[ _-]?(?:key|voti)|token|credentials|saladus)[a-z]*\\b");
+    private static final Pattern SENSITIVE_REQUEST_ACTION = Pattern.compile(
+            "\\b(?:give|show|reveal|return|find|list|anna|naita|avalda|tagasta|otsi|mis on|what is)\\b");
+    private static final Pattern SENSITIVE_REQUEST_SECRET = Pattern.compile(
+            "\\b(?:(?:administrator|administraator|administraatori|admin)\\s+)?"
+                    + "(?:password|passwd|parool|api[ _-]?(?:key|voti)|token|credentials|saladus)\\b");
     private static final Pattern DESTRUCTIVE = Pattern.compile(
-            "\\b(delete|remove|erase|kustuta).{0,30}(all|koik).{0,20}(files|failid|andmebaas)\\b");
+            "\\b(delete|remove|erase|kustuta)\\b[^\\r\\n]{0,30}\\b(all|koik)\\b[^\\r\\n]{0,20}\\b(files|failid|andmebaas)\\b");
     private static final Pattern ABSOLUTE_PATH = Pattern.compile(
             "(?:^|\\s|['\"])(?:[a-z]:[\\\\/]|/(?:[a-z0-9._-]+(?:/|$))+|\\\\\\\\)",
             Pattern.CASE_INSENSITIVE);
@@ -77,7 +79,7 @@ public class RequestSecurityService {
         if (SECRET_VALUE_PATTERNS.stream().anyMatch(pattern -> pattern.matcher(question).find())
                 || LABELED_SECRET.matcher(normalized).find()
                 || LABELED_PERSONAL_ID.matcher(normalized).find()
-                || SENSITIVE_REQUEST.matcher(normalized).find()) {
+                || containsSensitiveRequest(normalized)) {
             return Optional.of(new Violation("SENSITIVE_INPUT",
                     "Päring sisaldab või küsib tundlikke autentimis- või isikuandmeid."));
         }
@@ -98,6 +100,20 @@ public class RequestSecurityService {
                 || normalized.contains("\\etc\\passwd")
                 || normalized.indexOf('\0') >= 0
                 || ABSOLUTE_PATH.matcher(normalized).find();
+    }
+
+    private boolean containsSensitiveRequest(String normalized) {
+        Matcher secretMatcher = SENSITIVE_REQUEST_SECRET.matcher(normalized);
+        while (secretMatcher.find()) {
+            Matcher actionMatcher = SENSITIVE_REQUEST_ACTION.matcher(normalized);
+            while (actionMatcher.find()) {
+                if (secretMatcher.start() >= actionMatcher.end()
+                        && secretMatcher.start() - actionMatcher.end() <= 100) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private String normalize(String value) {
