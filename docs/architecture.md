@@ -4,7 +4,7 @@
 
 ## Süsteemi kuju
 
-Rakendus on üks sünkroonne Java 21 ja Spring Booti protsess. REST-kontroller annab küsimuse turvakontrollile, orkestreerija loob eraldi süsteemi- ja kasutajasõnumid, Spring AI kutsub OpenAI mudelit ning annab mudelile ainult kaks teadmusbaasi tööriista. Viis Markdown-dokumenti laaditakse fikseeritud classpath-manifestist käivitamisel mällu.
+Rakendus on üks sünkroonne Java 21 ja Spring Booti protsess. REST-kontroller annab küsimuse turvakontrollile, orkestreerija teeb sama päringu jaoks esmalt deterministliku otsingu lubatud teadmusbaasi tööriistaga ning loob eraldi süsteemi- ja kasutajasõnumid. Spring AI kutsub OpenAI mudelit ja annab mudelile ainult kaks teadmusbaasi tööriista. Viis Markdown-dokumenti laaditakse fikseeritud classpath-manifestist käivitamisel mällu.
 
 ```mermaid
 flowchart LR
@@ -30,7 +30,7 @@ Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratu
 
 `KnowledgeBaseTools` eksponeerib Spring AI-le ainult `listTopics` ja `searchKnowledgeBase`. Otsinguargument on andmestring, mitte failitee. Repository avab ainult manifestis nimetatud classpath-ressursid; tööriistadel puuduvad võrgu-, kirjutamis- ja käsuvõimed.
 
-Mudel ei koosta avalikku vastust. Ta tagastab `AgentDecision` objekti, mille action on `ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`, ning valib tööriistatulemustes olnud lõikude ID-d. `CurrentTurnEvidence` kogub ainult sama päringu jooksul tagastatud kanoonilised lõigud. `GroundedResponseAssembler` kontrollib ID-sid repository vastu, kontrollib nende sobivust küsimusega ning ehitab vastuse täpsest lõigutekstist. Seetõttu ei saa mudeli väljamõeldud allikas ega faktiline proosa avalikku API vastusesse jõuda.
+Mudel ei koosta avalikku vastust. Ta tagastab `AgentDecision` objekti, mille action on `ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`, ning valib tööriistatulemustes olnud lõikude ID-d. `CurrentTurnEvidence` kogub ainult sama päringu jooksul tagastatud kanoonilised lõigud. Orkestreerija esmane tööriistaotsing tagab, et mudeli juhuslik tööriistakutse vahelejätmine või põhjendamatu keeldumine ei muudaks toetatud küsimust veaks. `GroundedResponseAssembler` võib sellise otsuse taastada ainult siis, kui algne küsimus läbib sõltumatu relevantsuskontrolli ja sama päringu tööriistatõend on kanooniline. Toetamata detaili puhul on otsing tühi ja keeldumist ei taastata. Seetõttu ei saa mudeli väljamõeldud allikas ega faktiline proosa avalikku API vastusesse jõuda.
 
 `CurrentTurnEvidence` kasutab `ThreadLocal`-it ning tugineb rakenduse praegusele sünkroonsele eeldusele, et orkestreerimine, mudelikõne ja tööriistakutsed täidetakse sama päringulõime kontekstis. Asünkroonse tööriistatäitmise korral ei ole see eeldus piisav: siis tuleb tõendikontekst muuta eksplitsiitselt request-scoped'iks ning kontrollida paralleelpäringute isolatsiooni eraldi testidega.
 

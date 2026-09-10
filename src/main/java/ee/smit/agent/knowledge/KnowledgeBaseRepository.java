@@ -44,7 +44,8 @@ public class KnowledgeBaseRepository {
        substantive terms must not turn a merely related topic into evidence. */
     private static final Map<String, List<String>> SUPPORTED_ALIASES = Map.of(
             "gitlab-access.md", List.of(
-                    "taotleda", "taotlus", "juurdepaas", "juurdepaasu", "saamine", "juhis", "juhised",
+                    "access", "taotleda", "taotlus", "juurdepaas", "juurdepaasu", "saamine", "juhis", "juhised",
+                    "juhiseid",
                     "kinnitaja", "kinnitab", "kinnitus", "kestus", "kaua", "aeg", "paev", "paeva"),
             "kubernetes-deploy.md", List.of(
                     "kasutusele votmine", "votta", "paigaldamine", "protsess", "juhis", "juhised"),
@@ -60,7 +61,8 @@ public class KnowledgeBaseRepository {
             "aga", "aega", "andke", "anna", "do", "enne", "get", "how", "i", "info", "jarel",
             "iga", "kaib", "kas", "kaudu", "kes", "kui", "kuidas", "kust", "ma", "mis", "mulle", "mul", "on",
             "palun", "parast", "peab", "probleem", "protsess", "saan", "saab", "saada", "see", "seda",
-            "selle", "sellest", "teha", "toimub", "ule", "vajaksin", "vaja", "voi", "votab", "lisainfo"
+            "selle", "sellest", "teha", "toimub", "ule", "vajaksin", "vaja", "voi", "votab", "lisainfo",
+            "parineb"
     );
 
     private static final List<String> FILE_ORDER = List.of(

@@ -40,11 +40,11 @@ public class GroundedResponseAssembler {
     public AskResponse assemble(String question, List<AgentExchange> history, AgentDecision decision,
                                 Map<String, KnowledgePassage> currentEvidence) {
         if (decision == null || decision.action() == null) {
-            return refusal(GROUNDING_FAILURE);
+            return recoverSupportedAnswer(question, history, currentEvidence);
         }
 
         final String normalizedAction = decision.action().trim().toUpperCase(Locale.ROOT);
-        return switch (normalizedAction) {
+        AskResponse response = switch (normalizedAction) {
             case "ANSWER" -> answer(decision.selectedPassageIds(), currentEvidence,
                     eligibleAnswerIds(question, history));
             case "LIST_TOPICS" -> isTopicListQuestion(question)
@@ -56,6 +56,10 @@ public class GroundedResponseAssembler {
             case "REFUSE" -> refusal(mapRefusalReason(decision.refusalReason()));
             default -> refusal(GROUNDING_FAILURE);
         };
+        if (!response.refused()) {
+            return response;
+        }
+        return recoverSupportedAnswer(question, history, currentEvidence, response.refusalReason());
     }
 
     public AskResponse refusal(String reason) {
@@ -76,6 +80,24 @@ public class GroundedResponseAssembler {
                 .map(passage -> passage.excerpt() + " [allikas: " + passage.file() + "]")
                 .collect(java.util.stream.Collectors.joining("\n\n"));
         return grounded(answer, passages, "high");
+    }
+
+    private AskResponse recoverSupportedAnswer(String question, List<AgentExchange> history,
+                                                Map<String, KnowledgePassage> evidence) {
+        return recoverSupportedAnswer(question, history, evidence, GROUNDING_FAILURE);
+    }
+
+    private AskResponse recoverSupportedAnswer(String question, List<AgentExchange> history,
+                                                Map<String, KnowledgePassage> evidence,
+                                                String refusalReason) {
+        Set<String> eligibleIds = eligibleAnswerIds(question, history);
+        List<String> evidencedEligibleIds = evidence.keySet().stream()
+                .filter(eligibleIds::contains)
+                .toList();
+        if (evidencedEligibleIds.isEmpty()) {
+            return refusal(refusalReason);
+        }
+        return answer(evidencedEligibleIds, evidence, eligibleIds);
     }
 
     private AskResponse topicList(List<String> selectedIds, Map<String, KnowledgePassage> evidence) {

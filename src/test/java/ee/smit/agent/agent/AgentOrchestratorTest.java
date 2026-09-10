@@ -41,6 +41,30 @@ class AgentOrchestratorTest {
     }
 
     @Test
+    void supportedQuestionSurvivesModelRefusalAfterDeterministicToolLookup() {
+        AgentModelGateway gateway = (question, history) ->
+                new AgentDecision("REFUSE", List.of(), "NOT_FOUND");
+
+        var response = service(gateway).ask(new AskRequest(
+                "Kuidas taotleda ligipääsu GitLabile?", null));
+
+        assertThat(response.refused()).isFalse();
+        assertThat(response.answer()).contains("[allikas: gitlab-access.md]");
+    }
+
+    @Test
+    void supportedFollowUpSurvivesModelRefusalAfterContextualToolLookup() {
+        AgentOrchestrator service = service((question, history) ->
+                new AgentDecision("REFUSE", List.of(), "NOT_FOUND"));
+
+        service.ask(new AskRequest("Kuidas taotleda ligipääsu GitLabile?", "session-1"));
+        var response = service.ask(new AskRequest("Kui kaua see võtab aega?", "session-1"));
+
+        assertThat(response.refused()).isFalse();
+        assertThat(response.answer()).contains("1–2 tööpäeva", "[allikas: gitlab-access.md]");
+    }
+
+    @Test
     void refusesUnsafeInputBeforeCallingModel() {
         AtomicInteger calls = new AtomicInteger();
         AgentModelGateway gateway = (question, history) -> {
@@ -122,7 +146,7 @@ class AgentOrchestratorTest {
     }
 
     private AgentOrchestrator service(AgentModelGateway gateway) {
-        return new AgentOrchestrator(new RequestSecurityService(), gateway, evidence,
+        return new AgentOrchestrator(new RequestSecurityService(), gateway, evidence, tools,
                 assembler, new SessionStore());
     }
 

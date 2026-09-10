@@ -1,6 +1,7 @@
 package ee.smit.agent.response;
 
 import ee.smit.agent.agent.AgentDecision;
+import ee.smit.agent.api.Source;
 import ee.smit.agent.knowledge.KnowledgeBaseRepository;
 import ee.smit.agent.knowledge.KnowledgePassage;
 import org.junit.jupiter.api.Test;
@@ -130,6 +131,42 @@ class GroundedResponseAssemblerTest {
             assertThat(response.sources()).isEmpty();
             assertThat(response.answer()).doesNotContain("50 eurot", "polügraafi", "gitlab-access.md");
         }
+    }
+
+    @Test
+    void recoversSupportedAnswerWhenModelRefusesDespiteCurrentToolEvidence() {
+        KnowledgePassage passage = repository.search("Kuidas taotleda ligipääsu GitLabile?").getFirst();
+
+        var response = assembler.assemble("Kuidas taotleda ligipääsu GitLabile?", List.of(),
+                new AgentDecision("REFUSE", List.of(), "NOT_FOUND"),
+                Map.of(passage.id(), passage));
+
+        assertThat(response.refused()).isFalse();
+        assertThat(response.sources()).extracting(Source::file).containsExactly("gitlab-access.md");
+        assertThat(response.answer()).contains("[allikas: gitlab-access.md]");
+    }
+
+    @Test
+    void recoversSupportedAnswerWhenModelSelectsNoPassage() {
+        KnowledgePassage passage = repository.search("Kuidas taotleda ligipääsu GitLabile?").getFirst();
+
+        var response = assembler.assemble("Kuidas taotleda ligipääsu GitLabile?", List.of(),
+                new AgentDecision("ANSWER", List.of(), null), Map.of(passage.id(), passage));
+
+        assertThat(response.refused()).isFalse();
+        assertThat(response.sources()).extracting(Source::file).containsExactly("gitlab-access.md");
+    }
+
+    @Test
+    void doesNotRecoverUnsupportedDetailFromMerelyRelatedToolEvidence() {
+        KnowledgePassage passage = repository.search("gitlab").getFirst();
+
+        var response = assembler.assemble("Kas GitLabi ligipääs maksab 50 eurot?", List.of(),
+                new AgentDecision("REFUSE", List.of(), "NOT_FOUND"),
+                Map.of(passage.id(), passage));
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.sources()).isEmpty();
     }
 
     @Test

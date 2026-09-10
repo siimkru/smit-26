@@ -79,6 +79,10 @@ class KnowledgeBaseRepositoryTest {
                 .extracting(KnowledgePassage::file).contains("code-review.md");
         assertThat(repository.search("Kuidas Kubernetes kasutusele võtta?"))
                 .extracting(KnowledgePassage::file).contains("kubernetes-deploy.md");
+        assertThat(repository.search("How do I get GitLab access? Vajaksin juhiseid."))
+                .extracting(KnowledgePassage::file).contains("gitlab-access.md");
+        assertThat(repository.search("Kust see info pärineb? Kuidas taotleda ligipääsu GitLabile?"))
+                .extracting(KnowledgePassage::file).contains("gitlab-access.md");
     }
 
     @Test
