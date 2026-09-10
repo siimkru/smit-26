@@ -84,7 +84,7 @@ public class KnowledgeBaseRepository {
     }
 
     public List<KnowledgePassage> listTopics() {
-        return topics;
+        return List.copyOf(topics);
     }
 
     public Optional<KnowledgePassage> findById(String id) {

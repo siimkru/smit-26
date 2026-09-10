@@ -9,4 +9,12 @@ public record AskResponse(
         boolean refused,
         String refusalReason
 ) {
+    public AskResponse {
+        sources = sources == null ? List.of() : List.copyOf(sources);
+    }
+
+    @Override
+    public List<Source> sources() {
+        return List.copyOf(sources);
+    }
 }

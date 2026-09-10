@@ -7,4 +7,9 @@ public record AgentDecision(String action, List<String> selectedPassageIds, Stri
     public AgentDecision {
         selectedPassageIds = selectedPassageIds == null ? List.of() : List.copyOf(selectedPassageIds);
     }
+
+    @Override
+    public List<String> selectedPassageIds() {
+        return List.copyOf(selectedPassageIds);
+    }
 }

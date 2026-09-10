@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class AgentPromptFactory {
+public final class AgentPromptFactory {
 
     private final String systemPrompt;
 

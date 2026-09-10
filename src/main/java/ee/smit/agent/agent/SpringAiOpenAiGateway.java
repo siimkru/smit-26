@@ -27,7 +27,7 @@ public class SpringAiOpenAiGateway implements AgentModelGateway {
                                  ObjectMapper objectMapper) {
         this.promptFactory = promptFactory;
         this.chatClient = createClient(properties, knowledgeBaseToolCallbackProvider);
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMapper.copy();
     }
 
     @Override
