@@ -160,6 +160,8 @@ Hindamiseks vajalik päris integratsioonijooks tuleb teha võtmega lokaalselt v�
 ## Teadaolevad piirangud
 
 - Lahendus järgib ülesande teadlikult väikest skoopi: eesmärk ei ole täiuslik tootmissüsteem ega keerukas RAG- või käitusinfrastruktuur. Alltoodud piirangud on seetõttu dokumenteeritud, mitte varjatult tootmiskindlateks eeldatud.
+- Ülevaatusel tuvastatud järgmised puudused on kodutöö kontekstis teadlikult väljaspool ülesande skoopi: sessiooniomaniku autentimine, püsiv või mitme instantsi sessioonisalvestus, asünkroonne/paralleelne tool calling ning tootmiskõlblik rate limiting, kulukontroll ja operatiivmõõdikud. Ülesanne ei nõua autentimisplatvormi, hajusolekut ega tootmiskõlblikku infrastruktuuri.
+- See out-of-scope märge ei vähenda kohustuslikke nõudeid: sisendi suuruse piirang, prompt injection'i käsitlemine, tööriistade allowlist, repository-põhine grounding, allikaviited, turvaline logimine ja võtmeta unit-testid on rakendatud ning testitud.
 - Märksõnaotsing ja mustripõhine ründetuvastus on teadlikult lihtsad. Filter ei pruugi tuvastada kõiki parafraase, Unicode'i homoglüüfe, null-laiusega märke, kodeeritud ründeid või tundlike andmete vorme; mõju piirab mudelist sõltumatu kanoonilise väljundi kontroll.
 - OpenAI otsus võib mudeli ja aja lõikes erineda; rakendus piirab mõju kanoonilise, rakenduse koostatud väljundiga.
 - Sessioonid on kliendi valitud ID-ga, autentimata ja omanikuga sidumata. Sama ID teadja saab sessiooni konteksti jätkata. Need aeguvad 30 minuti tegevusetuse järel, on protsessipõhised, piiratud nelja vahetusega, kaovad restardil ja neid ei jagata instantside vahel.
