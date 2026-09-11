@@ -110,6 +110,14 @@ class KnowledgeBaseRepositoryTest {
     }
 
     @Test
+    void acceptsCommonGitlabAccessParaphrases() {
+        assertThat(repository.search("Kuidas pääsen GitLabi?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
+        assertThat(repository.search("Kelle heakskiitu on GitLabi ligipääsuks vaja?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
+    }
+
+    @Test
     void doesNotUseSubstringCollisionsAsKnowledgeEvidence() {
         assertThat(repository.search("Kuidas GitLabine töövoog töötab?")).isEmpty();
         assertThat(repository.search("Mis on Kuberneteslik platvorm?")).isEmpty();

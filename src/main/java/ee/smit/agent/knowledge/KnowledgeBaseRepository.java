@@ -45,9 +45,10 @@ public class KnowledgeBaseRepository {
     private static final Map<String, List<String>> SUPPORTED_ALIASES = Map.of(
             "gitlab-access.md", List.of(
                     "access", "taotleda", "taotlus", "juurdepaas", "juurdepaasu", "saamine", "juhis", "juhised",
-                    "juhiseid", "ligi", "paaseda", "kord", "juhenda", "saamisel", "taotlemise",
+                    "juhiseid", "ligi", "paaseda", "paasen", "kord", "juhenda", "saamisel", "taotlemise",
                     "taotluse", "alustada", "alustama", "soovin", "kiire", "kiiresti",
-                    "kinnitaja", "kinnitab", "kinnitus", "kestus", "kaua", "aeg", "paev", "paeva"),
+                    "kinnitaja", "kinnitab", "kinnitus", "kinnitamiseks", "kinnitust", "heakskiit", "heakskiidu",
+                    "heakskiitu", "juht", "juhile", "kestus", "kaua", "aeg", "paev", "paeva"),
             "kubernetes-deploy.md", List.of(
                     "kasutusele votmine", "votta", "paigaldamine", "protsess", "juhis", "juhised", "kuberneteses"),
             "cicd.md", List.of(
@@ -63,7 +64,7 @@ public class KnowledgeBaseRepository {
             "iga", "kaib", "kas", "kaudu", "kes", "kui", "kuidas", "kust", "ma", "mis", "mulle", "mul", "on",
             "palun", "parast", "peab", "probleem", "protsess", "saan", "saab", "saada", "see", "seda",
             "selle", "sellest", "teha", "toimub", "ule", "vajaksin", "vaja", "voi", "votab", "lisainfo",
-            "parineb", "et", "milline", "mind", "mida"
+            "parineb", "et", "kelle", "milline", "mind", "mida"
     );
 
     private static final List<String> FILE_ORDER = List.of(
