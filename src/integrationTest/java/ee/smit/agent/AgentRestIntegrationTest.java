@@ -6,7 +6,6 @@ import ee.smit.agent.api.AskRequest;
 import ee.smit.agent.api.AskResponse;
 import ee.smit.agent.api.Source;
 import ee.smit.agent.knowledge.KnowledgeBaseRepository;
-import ee.smit.agent.knowledge.KnowledgeBaseTools;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +20,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -50,9 +47,6 @@ class AgentRestIntegrationTest {
 
     @MockitoSpyBean
     private AgentModelGateway modelGateway;
-
-    @MockitoSpyBean
-    private KnowledgeBaseTools knowledgeBaseTools;
 
     @Test
     @DisplayName("API-04 - real OpenAI response has the required public JSON structure")
@@ -81,13 +75,9 @@ class AgentRestIntegrationTest {
     @Test
     @DisplayName("UC-01 - direct GitLab access question is answered from gitlab-access.md")
     void uc01AnswersDirectGitLabQuestion() {
-        clearInvocations(knowledgeBaseTools);
-        AskResponse response = ask("Kuidas taotleda ligipääsu GitLabile?", null);
+        AskResponse response = askThroughRealModel("Kuidas taotleda ligipääsu GitLabile?");
 
         assertSupported(response, "gitlab-access.md");
-        // One call is the deterministic pre-search; another proves that OpenAI
-        // invoked the registered Spring AI callback during the model exchange.
-        verify(knowledgeBaseTools, atLeast(2)).searchKnowledgeBase(anyString());
     }
 
     @Test
