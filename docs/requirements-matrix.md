@@ -20,9 +20,9 @@
 | Prompt injection ja sisemiste juhiste avaldamise kaitse | fail-fast mustrid, fikseeritud süsteemiprompt, suletud mudeliotsus, rakenduse väljundivalideerimine | SEC-01–SEC-06 ja SEC-08; path traversal (SEC-06) on teadlikult fail-fast ning semantilised rolli- ja promptiründed läbivad lisaks mudelivoo |
 | Tundlikku infot ei saadeta teadlikult OpenAI-le | parooli, võtme, tokeni, privaatvõtme ja isikukoodi kontrollid enne mudelit; sünteetiline KB | `RequestSecurityServiceTest`, `AgentOrchestratorTest`; UC-11 |
 | Täisküsimust ei logita | turvalogi sisaldab ainult kategooriat ja pikkust | logi püüdmise unit-test |
-| Valikuline korduvkasutatav sessioon | piiratud `SessionStore`; tõendid otsitakse järelküsimusel uuesti | `SessionStoreTest`, `AgentOrchestratorTest`, UC-06 ja UC-13 |
+| Valikuline korduvkasutatav sessioon | piiratud `SessionStore`; tõendid otsitakse järelküsimusel uuesti | `SessionStoreTest`, `AgentOrchestratorTest`, UC-06, UC-13 ja UC-14 |
 | Unit-testid on võtmeta ja mockivad välised sõltuvused | `src/test`, tühi mudelikonfiguratsioon ja gateway test-double'id | `./gradlew test` |
-| Päris integratsioonitestid on eraldi | `src/integrationTest`, `integrationTest` Gradle task | API-04, UC-01–UC-13, SEC-01–SEC-06 ja SEC-08 |
+| Päris integratsioonitestid on eraldi | `src/integrationTest`, `integrationTest` Gradle task | API-04, UC-01–UC-14, SEC-01–SEC-06 ja SEC-08 |
 | Eraldi HTML raportid | Gradle `test` ja `integrationTest` raportite konfiguratsioon | `build/reports/tests/test/` ja `build/reports/tests/integrationTest/` |
 | GitHub Actions käivitab testid ja avaldab raportid | `.github/workflows/tests.yml`, `.github/workflows/live-integration.yml`, `.github/workflows/security.yml` | `unit-test-html-report` ja live-jooksul `integration-test-html-report` artefaktid; Gitleaks töötab eraldi security-workflow's |
 | Genereeritud raporteid ei commitita | `.gitignore` ignoreerib `build/` | `git check-ignore build/reports/tests/test/index.html` |
@@ -38,6 +38,7 @@
 | API-04 | `AgentRestIntegrationTest`; avaliku JSON struktuur päris OpenAI voos |
 | UC-01–UC-08 | sama integratsiooniklass; toetatud, allikaga ja eestikeelne käitumine ning sessiooni järelküsimus |
 | UC-09–UC-13 | sama integratsiooniklass; keeldumised, väljamõeldud allika puudumine ja allika järelküsimus |
+| UC-14 | `AgentRestIntegrationTest`; pikem GitLabi vestlus püsib maandatud ka pärast sessiooni konteksti ülelibisemist |
 | GROUND-01, GROUND-02 | `AgentRestIntegrationTest`; teadaoleva teemaga seotud, kuid lõigus toetamata detail lükatakse tagasi |
 | SEC-01–SEC-06, SEC-08 | sama integratsiooniklass; ülesande originaalsisendid peatavad teadaolevad ründed fail-fast, samal ajal kui mudelini jõudvad semantilised variandid kontrollivad ohutut tulemust |
 
