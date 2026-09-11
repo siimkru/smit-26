@@ -2,6 +2,7 @@ package ee.smit.agent.response;
 
 import ee.smit.agent.agent.AgentDecision;
 import ee.smit.agent.agent.AgentExchange;
+import ee.smit.agent.agent.AgentQuestionSupport;
 import ee.smit.agent.api.AskResponse;
 import ee.smit.agent.api.Source;
 import ee.smit.agent.knowledge.KnowledgeBaseRepository;
@@ -14,20 +15,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.text.Normalizer;
 
 /** Final trust boundary: only canonical current-turn KB text reaches factual API answers. */
 @Component
 public class GroundedResponseAssembler {
-
-    private static final Pattern TOPIC_LIST_INTENT = Pattern.compile(
-            "\\b(?:mis|millised|millistel|millistest|milliste)\\s+teem(?:adel|adest|adega|ad|a)\\b");
-    private static final Set<String> TOPIC_LIST_ALLOWED_TERMS = Set.of(
-            "mis", "millised", "millistel", "millistest", "milliste", "teemadel", "teemadest", "teemadega",
-            "teemad", "teema", "teemade", "saad", "mulle", "infot", "anda", "oskad", "aidata",
-            "gitlab", "kubernetes", "k8s", "cicd",
-            "pipeline", "code", "review", "koodireview", "ligipaas", "haldus", "access");
 
     private static final String GROUNDING_FAILURE =
             "Vastust ei saanud usaldusväärselt siduda teadmusbaasi allikaga.";
@@ -56,7 +48,7 @@ public class GroundedResponseAssembler {
         AskResponse response = switch (normalizedAction) {
             case "ANSWER" -> answer(decision.selectedPassageIds(), currentEvidence,
                     eligibleAnswerIds(question, history));
-            case "LIST_TOPICS" -> isSupportedTopicListQuestion(question)
+            case "LIST_TOPICS" -> AgentQuestionSupport.isSupportedTopicListQuestion(question)
                     ? topicList(decision.selectedPassageIds(), currentEvidence)
                     : refusal(GROUNDING_FAILURE);
             case "CLARIFY" -> isDeployQuestion(question)
@@ -99,7 +91,7 @@ public class GroundedResponseAssembler {
     private AskResponse recoverSupportedAnswer(String question, List<AgentExchange> history,
                                                 Map<String, KnowledgePassage> evidence,
                                                 String refusalReason) {
-        if (isSupportedTopicListQuestion(question)
+        if (AgentQuestionSupport.isSupportedTopicListQuestion(question)
                 && evidence.keySet().containsAll(allTopicIds)) {
             return topicList(repository.listTopics().stream()
                     .map(KnowledgePassage::id)
@@ -187,78 +179,17 @@ public class GroundedResponseAssembler {
             return direct.stream().map(KnowledgePassage::id)
                     .collect(java.util.stream.Collectors.toUnmodifiableSet());
         }
-        if (!isFollowUp(question) || history.isEmpty()) {
+        if (!AgentQuestionSupport.isFollowUp(question) || history.isEmpty()) {
             return Set.of();
         }
-        String contextualQuery = boundedContextualQuery(question, history);
+        String contextualQuery = AgentQuestionSupport.contextualQuery(question, history);
         return repository.search(contextualQuery).stream().map(KnowledgePassage::id)
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
-    }
-
-    private String boundedContextualQuery(String question, List<AgentExchange> history) {
-        StringBuilder query = new StringBuilder(question);
-        for (AgentExchange exchange : history) {
-            int remaining = KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH - query.length() - 1;
-            if (remaining <= 0) {
-                break;
-            }
-            appendBounded(query, exchange.question(), remaining);
-            remaining = KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH - query.length() - 1;
-            if (remaining > 0) {
-                appendSourceAnchors(query, exchange.answer(), remaining);
-            }
-        }
-        return query.toString();
-    }
-
-    private void appendSourceAnchors(StringBuilder query, String answer, int remaining) {
-        String marker = "[allikas: ";
-        int from = 0;
-        while (remaining > 0) {
-            int markerStart = answer.indexOf(marker, from);
-            if (markerStart < 0) {
-                return;
-            }
-            int fileStart = markerStart + marker.length();
-            int fileEnd = answer.indexOf(']', fileStart);
-            if (fileEnd < 0) {
-                return;
-            }
-            String file = answer.substring(fileStart, fileEnd).replaceFirst("\\.md$", "");
-            appendBounded(query, file, remaining);
-            remaining = KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH - query.length() - 1;
-            from = fileEnd + 1;
-        }
-    }
-
-    private void appendBounded(StringBuilder query, String value, int remaining) {
-        query.append(' ').append(value, 0, Math.min(remaining, value.length()));
-    }
-
-    private boolean isTopicListQuestion(String question) {
-        return TOPIC_LIST_INTENT.matcher(normalize(question)).find();
-    }
-
-    private boolean isSupportedTopicListQuestion(String question) {
-        if (!isTopicListQuestion(question)) {
-            return false;
-        }
-        return java.util.Arrays.stream(normalize(question).split("[^a-z0-9]+"))
-                .filter(token -> !token.isBlank())
-                .allMatch(TOPIC_LIST_ALLOWED_TERMS::contains);
     }
 
     private boolean isDeployQuestion(String question) {
         String normalized = normalize(question);
         return normalized.contains("deploy") || normalized.contains("juurut");
-    }
-
-    private boolean isFollowUp(String question) {
-        String normalized = normalize(question);
-        return normalized.matches(".*\\b(see|seda|selle|sellest|aga)\\b.*")
-                || normalized.contains("kui kaua")
-                || normalized.startsWith("kust")
-                || normalized.contains("mis edasi");
     }
 
     private String normalize(String value) {
