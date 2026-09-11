@@ -12,21 +12,21 @@ jobs:
       contents: read
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.0
         with:
           distribution: temurin
           java-version: '21'
           cache: gradle
 
       - name: Scan repository and Git history for secrets
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
 
       - name: Scan dependency changes for known vulnerabilities
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@4901385134134e04cec5fbe5ddfe3b2c5bd5d976 # v4.0.0
         with:
           fail-on-severity: high
 
@@ -35,35 +35,8 @@ jobs:
 
       - name: Upload unit-test HTML report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: unit-test-html-report
           path: build/reports/tests/test/
-          if-no-files-found: error
-
-      - name: Run real OpenAI integration tests when configured
-        if: always()
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || vars.OPENAI_MODEL }}
-          CI_EVENT_NAME: ${{ github.event_name }}
-        run: |
-          ./gradlew integrationTest
-          if [ -z "$OPENAI_API_KEY" ] || [ -z "$OPENAI_MODEL" ]; then
-            echo "::warning::Real OpenAI integration tests were skipped because credentials are not configured."
-            echo "### OpenAI integration tests: skipped (credentials unavailable)" >> "$GITHUB_STEP_SUMMARY"
-            if [ "$CI_EVENT_NAME" = "workflow_dispatch" ]; then
-              echo "A manually requested integration validation must execute the real provider tests." >&2
-              exit 1
-            fi
-          else
-            echo "### OpenAI integration tests: executed against the real provider" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      - name: Upload integration-test HTML report
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: integration-test-html-report
-          path: build/reports/tests/integrationTest/
           if-no-files-found: error

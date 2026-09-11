@@ -144,10 +144,14 @@ Testitulemuste arv sõltub testide ja parameetrite hetkeversioonist; reprodutsee
 
 ## GitHub Actions ja testiraportid
 
-Workflow [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml) käivitab push'i, pull request'i ja käsitsi käivitamise korral alati unit-testid. Seejärel käivitab ta integratsioonitask'i; päris OpenAI testid aktiveeruvad ainult siis, kui GitHubis on `OPENAI_API_KEY` secret ning `OPENAI_MODEL` secret või repository variable. Mõlemad raportid laaditakse üles ka testitask'i ebaõnnestumise korral eraldi artefaktidena:
+Workflow [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml) käivitab push'i, pull request'i ja käsitsi käivitamise korral alati unit-testid ja staatilised kontrollid. Päris OpenAI integratsioonitestid on eraldi [Live OpenAI integration tests](https://github.com/siimkru/smit-26/actions/workflows/live-integration.yml) workflow's, mida saab käivitada ainult käsitsi ning mis kasutab `openai-integration` Environment'i.
+
+Staatiliste CI-tööriistade täpne jaotus on dokumenteeritud failis [docs/ci-static-analysis.md](docs/ci-static-analysis.md). CodeQL, actionlint, ShellCheck, zizmor, Semgrep CE, Gradle dependency submission ja OpenSSF Scorecard katavad vastavalt semantilise turvaanalüüsi, workflowde korrektse süntaksi, shelli, GitHub Actionsi turvahügieeni, mustripõhise SAST-i, sõltuvusgraafi ning tarneahela posture'i. OWASP Dependency-Checki ja SonarQube'i ei lisatud, sest need dubleeriksid olemasolevaid kontrolle.
+
+Unit-testid ja staatilised kontrollid ei saa OpenAI-võtit. Live-workflow eeldab GitHubis `OPENAI_API_KEY` ja `OPENAI_MODEL` väärtusi Environment'i secret'ide või muutujatena ning selle raport laaditakse üles ka testi ebaõnnestumise korral.
 
 
-Kui CI saladusi ei ole, näitab integratsiooniraport vahele jäetud teste. Hindamiseks vajalik päris integratsioonijooks tuleb sel juhul teha võtmega lokaalselt või seadistada repository saladused ja käivitada workflow käsitsi. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
+Hindamiseks vajalik päris integratsioonijooks tuleb teha võtmega lokaalselt või seadistada `openai-integration` Environment'i saladused ja käivitada live-workflow käsitsi. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
 
 Dokumentatsioon ei fikseeri ajaloolise workflow-jooksu artefakti ega testiarve; GitHub Actionsi värskeim jooks ja selle artefaktid on workflow vaates nähtavad.
 
@@ -159,7 +163,7 @@ Dokumentatsioon ei fikseeri ajaloolise workflow-jooksu artefakti ega testiarve; 
 - Sessioonid on kliendi valitud ID-ga, autentimata ja omanikuga sidumata. Sama ID teadja saab sessiooni konteksti jätkata. Need aeguvad 30 minuti tegevusetuse järel, on protsessipõhised, piiratud nelja vahetusega, kaovad restardil ja neid ei jagata instantside vahel.
 - Praeguse päringu tõendeid hoiab `ThreadLocal`, mis eeldab dokumenteeritud sünkroonset mudeli- ja tööriistavoogu samal lõimel. Asünkroonse tool calling'u lisamisel tuleb see asendada selgelt edasiantava request-scoped kontekstiga ja lisada concurrency-testid.
 - Rate limiting, mudelikõnede concurrency-limiit, HTTP serveri body-size'i lisapiir ning kulu- ja latentsusmõõdikud puuduvad. OpenAI HTTP-päringul on seadistatav 30-sekundiline vaike-timeout. Ülesanne märgib rate limiting'u soovituslikuks ega nõua tootmiskõlblikku käitusinfrastruktuuri; küsimuse 2000 märgi piir jääb rakendustaseme kaitseks.
-- CI eristab unit- ja integratsiooniraporteid, kuid võtmeta jooksus jäetakse päris OpenAI testid vahele ning job võib tehniliselt õnnestuda. Vahelejätmine on raportis nähtav ega tõenda live-integratsiooni edukust; hindamiseks kasutatakse dokumenteeritud võtmega jooksu.
+- CI hoiab unit- ja live-integratsioonitestid eraldi; live-workflow nõuab kaitstud Environment'i saladusi ja käsitsi käivitamist.
 - CI käivitab Gitleaksi kogu repole ja Git-ajaloole ning pull request'ide puhul GitHubi dependency review skanneri, mis peatab vähemalt kõrge raskusastmega teadaolevate sõltuvushaavatavustega muudatused. Repos on lisaks Gradle'i kaudu seadistatud Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo.
 - Iga Markdown-fail laaditakse ühe kanoonilise lõiguna. See on viie lühikese faili jaoks piisav, kuid pikema teadmusbaasi korral muutuksid väljavõtted liiga laiaks ning failid tuleks jagada stabiilsete ID-dega väiksemateks lõikudeks.
 - Rakendus sõltub agendipäringute ajal OpenAI saadavusest ning integratsioonitestid tarbivad päris API krediiti.
