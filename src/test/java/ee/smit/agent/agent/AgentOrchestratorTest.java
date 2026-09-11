@@ -109,6 +109,22 @@ class AgentOrchestratorTest {
         assertThat(calls).hasValue(0);
     }
 
+    @Test
+    void refusesCompactPasswordAssignmentBeforeCallingModel() {
+        AtomicInteger calls = new AtomicInteger();
+        AgentModelGateway gateway = (ignoredQuestion, history) -> {
+            calls.incrementAndGet();
+            return new AgentDecision("ANSWER", List.of(), null);
+        };
+
+        var response = service(gateway).ask(new AskRequest(
+                "GitLab password=Regression-Fake-010!", null));
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.sources()).isEmpty();
+        assertThat(calls).hasValue(0);
+    }
+
     @ParameterizedTest(name = "{0} - unsafe input is refused before the model call")
     @MethodSource("unsafeRequests")
     void requiredSecurityCasesFailFastBeforeCallingModel(String requirementId, String question) {

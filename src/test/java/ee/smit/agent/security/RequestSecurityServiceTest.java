@@ -130,6 +130,17 @@ class RequestSecurityServiceTest {
         assertThat(security.refusalReason(question)).isPresent();
     }
 
+    @ParameterizedTest(name = "compact credential assignment is refused: {0}")
+    @ValueSource(strings = {
+            "GitLab password=Regression-Fake-006!",
+            "GitLab password:Regression-Fake-007!",
+            "GitLab parool=Regression-Fake-008!",
+            "GitLab api-key=Regression-Fake-009!"
+    })
+    void refusesCompactCredentialAssignments(String question) {
+        assertThat(security.refusalReason(question)).isPresent();
+    }
+
     @ParameterizedTest(name = "ordinary word is not mistaken for a secret label: {0}")
     @ValueSource(strings = {
             "Kuidas paroolivahetus töötab?",
