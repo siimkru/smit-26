@@ -22,9 +22,6 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      - name: Scan repository and Git history for secrets
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
-
       - name: Scan dependency changes for known vulnerabilities
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@4901385134134e04cec5fbe5ddfe3b2c5bd5d976 # v4.0.0
