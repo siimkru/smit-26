@@ -120,6 +120,12 @@ class RequestSecurityServiceTest {
         assertThat(security.refusalReason("Kustuta kõik failid kettalt")).isPresent();
     }
 
+    @Test
+    void rejectsJsonStyleCredentialAssignments() {
+        assertThat(security.refusalReason("GitLab {\"password\":\"ReviewOnly-Fake-123!\"}"))
+                .isPresent();
+    }
+
     @ParameterizedTest(name = "inflected secret label is refused: {0}")
     @ValueSource(strings = {
             "Minu parooliks on Regression-Fake-001!",
