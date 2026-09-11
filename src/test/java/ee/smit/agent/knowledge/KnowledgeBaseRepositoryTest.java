@@ -114,6 +114,10 @@ class KnowledgeBaseRepositoryTest {
                 .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
         assertThat(repository.search("Kes kinnitab GitLabi taotluse?"))
                 .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
+        assertThat(repository.search("Sooviksin GitLabi kasutama hakata, mida tegema pean?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
+        assertThat(repository.search("Kes peab mu GitLabi taotluse heaks kiitma?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
     }
 
     @Test

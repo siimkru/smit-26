@@ -47,6 +47,7 @@ public class KnowledgeBaseRepository {
                     "access", "taotleda", "taotlus", "juurdepaas", "juurdepaasu", "saamine", "juhis", "juhised",
                     "juhiseid", "ligi", "paaseda", "paasen", "kord", "juhenda", "saamisel", "taotlemise",
                     "taotluse", "alustada", "alustama", "soovin", "kiire", "kiiresti",
+                    "sooviksin", "kasutama", "hakata", "tegema", "heaks", "kiitma",
                     "kinnitaja", "kinnitab", "kinnitus", "kinnitamiseks", "kinnitust", "heakskiit", "heakskiidu",
                     "heakskiitu", "juht", "juhile", "kestus", "kaua", "aeg", "paev", "paeva"),
             "kubernetes-deploy.md", List.of(
@@ -64,7 +65,7 @@ public class KnowledgeBaseRepository {
             "iga", "kaib", "kas", "kaudu", "kes", "kui", "kuidas", "kust", "ma", "mis", "mulle", "mul", "on",
             "palun", "parast", "peab", "probleem", "protsess", "saan", "saab", "saada", "see", "seda",
             "selle", "sellest", "teha", "toimub", "ule", "vajaksin", "vaja", "voi", "votab", "lisainfo",
-            "parineb", "et", "kelle", "milline", "mind", "mida"
+            "parineb", "et", "kelle", "milline", "mind", "mida", "mu", "pean"
     );
 
     private static final List<String> FILE_ORDER = List.of(
