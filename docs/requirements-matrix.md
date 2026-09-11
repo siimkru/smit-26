@@ -24,7 +24,7 @@
 | Unit-testid on võtmeta ja mockivad välised sõltuvused | `src/test`, tühi mudelikonfiguratsioon ja gateway test-double'id | `./gradlew test` |
 | Päris integratsioonitestid on eraldi | `src/integrationTest`, `integrationTest` Gradle task | API-04, UC-01–UC-13, SEC-01–SEC-06 ja SEC-08 |
 | Eraldi HTML raportid | Gradle `test` ja `integrationTest` raportite konfiguratsioon | `build/reports/tests/test/` ja `build/reports/tests/integrationTest/` |
-| GitHub Actions käivitab testid ja avaldab raportid | `.github/workflows/tests.yml`, `.github/workflows/live-integration.yml` | `unit-test-html-report` ja live-jooksul `integration-test-html-report` artefaktid |
+| GitHub Actions käivitab testid ja avaldab raportid | `.github/workflows/tests.yml`, `.github/workflows/live-integration.yml`, `.github/workflows/security.yml` | `unit-test-html-report` ja live-jooksul `integration-test-html-report` artefaktid; Gitleaks töötab eraldi security-workflow's |
 | Genereeritud raporteid ei commitita | `.gitignore` ignoreerib `build/` | `git check-ignore build/reports/tests/test/index.html` |
 | README sisaldab käivitamist, API-t, konfiguratsiooni, turvet, andmetöötlust, testimist ja piiranguid | `README.md` | dokumentatsiooni audit |
 | Maksimaalselt ühe lehe kokkuvõte | `docs/submission-summary.md` | dokumentatsiooni audit |

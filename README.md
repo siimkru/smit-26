@@ -144,7 +144,7 @@ Testitulemuste arv sõltub testide ja parameetrite hetkeversioonist; reprodutsee
 
 ## GitHub Actions ja testiraportid
 
-CI koosneb kuuest eraldi workflow'st. [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml) käivitub push'i, pull request'i ja käsitsi käivitamise korral ning teeb Gitleaksi, pull request'i korral kõrge raskusastme piiriga dependency review kontrolli ja `./gradlew check` käsu. Unit-testide HTML-raport avaldatakse artefaktina `unit-test-html-report`.
+CI koosneb seitsmest eraldi workflow'st. [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml) käivitub push'i, pull request'i ja käsitsi käivitamise korral ning teeb pull request'i korral kõrge raskusastme piiriga dependency review kontrolli ja `./gradlew check` käsu. Unit-testide HTML-raport avaldatakse artefaktina `unit-test-html-report`. [Secret scan](https://github.com/siimkru/smit-26/actions/workflows/security.yml) käivitab Gitleaksi push'i, pull request'i ja käsitsi käivitamise korral.
 
 Teised workflow'd on [Live OpenAI integration tests](https://github.com/siimkru/smit-26/actions/workflows/live-integration.yml), [CodeQL](https://github.com/siimkru/smit-26/actions/workflows/codeql.yml), [Workflow analysis](https://github.com/siimkru/smit-26/actions/workflows/workflow-analysis.yml), [Gradle dependency submission](https://github.com/siimkru/smit-26/actions/workflows/dependency-submission.yml) ja [OpenSSF Scorecard](https://github.com/siimkru/smit-26/actions/workflows/scorecards.yml). Täpne jaotus, õigused ja piirangud on dokumenteeritud failis [docs/ci-static-analysis.md](docs/ci-static-analysis.md).
 

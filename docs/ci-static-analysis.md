@@ -10,6 +10,7 @@ dubleeri neid analüsaatoreid.
 
 | Kontroll | Workflow või käsk | Milleks kasutatakse | Mida see ei asenda |
 |---|---|---|---|
+| Gitleaks | `security.yml` | Saladuste otsing kogu repositooriumist ja Git-ajaloost | Rakenduse runtime-turvakontrolle ega sõltuvuste haavatavusanalüüsi |
 | CodeQL | `codeql.yml` | Semantiline Java turvaanalüüs, sh andmevoo ja taustal olevate haavatavuste leidmine | Checkstyle'i, PMD-d ega SpotBugsi |
 | actionlint | `workflow-analysis.yml` | GitHub Actions YAML-i, avaldiste, kontekstide ja action-input'ide valideerimine | Java analüüsi |
 | ShellCheck | `workflow-analysis.yml` actionlinti kaudu | Workflow `run` skriptide shell-spetsiifiliste vigade leidmine | Rakenduse Java turvakontrolle |
@@ -26,9 +27,11 @@ olemasolevaid Checkstyle-, PMD- ja SpotBugs-kontrolle.
 ## Käivitumine
 
 - `tests.yml` käivitub push'i, pull request'i ja käsitsi. See käivitab unit-testid,
-  Checkstyle'i, PMD-d, SpotBugsi, FindSecBugsi, JaCoCo ja Gitleaksi. Dependency
+  Checkstyle'i, PMD-d, SpotBugsi, FindSecBugsi ja JaCoCo. Dependency
   review käivitub ainult pull request'i korral ja peatab kõrge raskusastmega
   haavatavused.
+- `security.yml` käivitab Gitleaksi push'i, pull request'i ja käsitsi ning kontrollib
+  kogu repositooriumi ja Git-ajalugu.
 - `codeql.yml` käivitub push'i, pull request'i, käsitsi ja kord nädalas; tulemused
   lähevad GitHub Code Scanningusse.
 - `workflow-analysis.yml` käivitub push'i, pull request'i ja käsitsi ning kontrollib
