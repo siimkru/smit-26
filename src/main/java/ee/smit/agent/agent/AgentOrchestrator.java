@@ -9,7 +9,6 @@ import ee.smit.agent.response.GroundedResponseAssembler;
 import ee.smit.agent.security.RequestSecurityService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
