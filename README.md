@@ -154,10 +154,10 @@ Teised workflow'd on [Live OpenAI integration tests](https://github.com/siimkru/
 
 Unit-testid ja staatilised kontrollid ei saa OpenAI-võtit. Live-workflow käivitub ainult käsitsi, kasutab `openai-integration` Environment'i, käivitab `./gradlew integrationTest` ja avaldab raporti artefaktina `integration-test-html-report` ka testi ebaõnnestumise korral. CodeQL käivitub push'i, pull request'i, käsitsi ja kord nädalas; workflow-analysis käivitub push'i, pull request'i ja käsitsi; dependency submission push'i ja käsitsi; Scorecard push'i, käsitsi ja kord nädalas.
 
-Varasema kontrollitud commit'i `3d6c3fb` workflow-jooksud ja nende raportid:
+Kontrollitud commit'i `dc06594` workflow-jooksud ja nende raportid:
 
-- [Unit tests](https://github.com/siimkru/smit-26/actions/runs/34613241464) — unit-testid ja staatilised kontrollid; artefakt `unit-test-html-report`.
-- [Integration tests](https://github.com/siimkru/smit-26/actions/runs/34613275907) — päris OpenAI integratsioonitestid; artefakt `integration-test-html-report`.
+- [Unit tests](https://github.com/siimkru/smit-26/actions/runs/34652753447) — unit-testid ja staatilised kontrollid; artefakt `unit-test-html-report`.
+- [Integration tests](https://github.com/siimkru/smit-26/actions/runs/34652782480) — päris OpenAI integratsioonitestid; artefakt `integration-test-html-report`.
 
 Hindamiseks vajalik päris integratsioonijooks tuleb teha võtmega lokaalselt või seadistada `openai-integration` Environment'i saladused ja käivitada live-workflow käsitsi. Workflow lehtedel on nähtavad jooksude täpsed tulemused ja allalaaditavad raportid. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
 
