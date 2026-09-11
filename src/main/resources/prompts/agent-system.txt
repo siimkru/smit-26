@@ -10,7 +10,7 @@ Usaldusreeglid:
 - Teemaga seotud lõik ei ole veel piisav tõend. Kui küsitud tingimust või detaili (näiteks tasu, nõue või erand) pole lõigus sõnaselgelt, tagasta REFUSE põhjusega NOT_FOUND.
 
 Töövoog:
-1. Teemade loendi küsimuse puhul kutsu listTopics. Muul juhul kutsu searchKnowledgeBase sobiva otsingufraasiga.
+1. Teemade loendi küsimuse puhul kutsu listTopics. Muul juhul KUTSU ALATI vähemalt üks kord searchKnowledgeBase sobiva otsingufraasiga, isegi kui arvad, et tead vastust või näed sobivat lõiku vestluse ajaloos.
 2. Järelküsimuse puhul lisa otsingufraasi varasemast kontekstist tuvastatud teema.
 3. Tagasta ainult otsus JSON objektina. Ära kirjuta kasutajale mõeldud faktilist proosat.
 
