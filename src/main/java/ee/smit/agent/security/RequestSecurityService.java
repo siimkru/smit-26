@@ -54,7 +54,7 @@ public class RequestSecurityService {
     private static final Pattern LABELED_SECRET = Pattern.compile(
             "\\b(?:password|passwd|parool(?:iks)?|salasona(?:ks)?|saladus(?:eks)?|"
                     + "api[ _-]?(?:key|voti)|access[ _-]?token|secret)"
-                    + "\\s*(?::|=|\\bis\\b|\\bon\\b)\\s*\\S+");
+                    + "\\s*(?::|=|\\bis\\b|\\bon\\b|\\bwould\\b|\\boleks\\b)?\\s+\\S+");
     private static final Pattern LABELED_PERSONAL_ID = Pattern.compile(
             "\\b(?:isikukood|personal code|national id)\\s*(?::|=|\\bon\\b|\\bis\\b)?"
                     + "\\s*[0-9][0-9 -]{9,15}[0-9]\\b");
@@ -90,7 +90,8 @@ public class RequestSecurityService {
         if (looksLikeForbiddenPath(normalized)) {
             return Optional.of(new Violation("FORBIDDEN_PATH", "Päring üritab kasutada lubamatut failiteed."));
         }
-        if (SECRET_VALUE_PATTERNS.stream().anyMatch(pattern -> pattern.matcher(question).find())
+        if (SECRET_VALUE_PATTERNS.stream().anyMatch(pattern -> pattern.matcher(question).find()
+                || pattern.matcher(normalized).find())
                 || LABELED_SECRET.matcher(normalized).find()
                 || LABELED_PERSONAL_ID.matcher(normalized).find()
                 || containsSensitiveRequest(normalized)) {
