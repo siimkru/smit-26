@@ -14,4 +14,4 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: gradle/actions/dependency-submission@4733eaac7c1b0da527e4206b7671e0061de1ce37 # v6.0.0
+      - uses: gradle/actions/dependency-submission@0f4528296b4bc09e8ae0fc7be30185a4ab435545 # v6.0.0
