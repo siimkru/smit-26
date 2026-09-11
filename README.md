@@ -131,7 +131,7 @@ set +a
 ./gradlew integrationTest
 ```
 
-Testid käivitavad rakenduse juhuslikul lokaalsel pordil ja läbivad REST → agent → Spring AI → OpenAI voo. Kaetud on API-04, UC-01–UC-13, GROUND-01–GROUND-02 ning SEC-01–SEC-06 ja SEC-08. Väited kontrollivad stabiilseid käitumisinvariante, allikafaile ja keeldumisi, mitte mudeli sõnastust. SEC-07 on võtmeta API-test, sest liiga pikk sisend peab peatuma enne mudelikõnet. Kui võti või mudel puudub, märgitakse integratsiooniklass vahele jäetuks; seda ei loeta päris mudeliga edukaks jooksuks.
+Testid käivitavad rakenduse juhuslikul lokaalsel pordil ja läbivad REST → agent → Spring AI → OpenAI voo. Kaetud on API-04, UC-01–UC-13, GROUND-01–GROUND-02 ning SEC-01–SEC-06 ja SEC-08. Väited kontrollivad stabiilseid käitumisinvariante, allikafaile ja keeldumisi, mitte mudeli sõnastust. SEC-07 on võtmeta API-test, sest liiga pikk sisend peab peatuma enne mudelikõnet. `integrationTest` kontrollib enne testide käivitamist, et `OPENAI_API_KEY` ja `OPENAI_MODEL` on mittetühjad; puuduvate väärtustega lõpeb task veaga, mitte edukalt vahelejätmisega.
 
 Gradle genereerib eraldi inimloetavad HTML raportid:
 

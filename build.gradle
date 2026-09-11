@@ -150,6 +150,16 @@ tasks.register('integrationTest', Test) {
     classpath = sourceSets.integrationTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('test')
+    doFirst {
+        def missingVariables = ['OPENAI_API_KEY', 'OPENAI_MODEL'].findAll { variable ->
+            !(System.getenv(variable)?.trim())
+        }
+        if (!missingVariables.isEmpty()) {
+            throw new GradleException(
+                    "integrationTest requires non-empty ${missingVariables.join(', ')}; "
+                            + 'it must run against a real OpenAI model.')
+        }
+    }
     // A previous skipped/keyed run must not mask a new live-provider run.
     outputs.upToDateWhen { false }
     reports.html.required = true

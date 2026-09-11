@@ -9,7 +9,6 @@ import ee.smit.agent.knowledge.KnowledgeBaseRepository;
 import ee.smit.agent.knowledge.KnowledgeBaseTools;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.TestRestTemplate;
@@ -33,8 +32,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "agent.openai.temperature=1.0")
 @AutoConfigureTestRestTemplate
-@EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+", disabledReason = "OPENAI_API_KEY puudub")
-@EnabledIfEnvironmentVariable(named = "OPENAI_MODEL", matches = ".+", disabledReason = "OPENAI_MODEL puudub")
 class AgentRestIntegrationTest {
 
     private static final Set<String> ALLOWED_SOURCES = Set.of(
