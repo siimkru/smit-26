@@ -100,6 +100,16 @@ class KnowledgeBaseRepositoryTest {
     }
 
     @Test
+    void acceptsQuestionsAboutTimingAndHowToStart() {
+        assertThat(repository.search("Kui kiiresti saan GitLabi ligipääsu?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
+        assertThat(repository.search("Soovin GitLabi ligipääsu, kuidas alustada?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
+        assertThat(repository.search("Kes kinnitab GitLabi taotluse?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
+    }
+
+    @Test
     void doesNotUseSubstringCollisionsAsKnowledgeEvidence() {
         assertThat(repository.search("Kuidas GitLabine töövoog töötab?")).isEmpty();
         assertThat(repository.search("Mis on Kuberneteslik platvorm?")).isEmpty();

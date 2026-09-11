@@ -46,6 +46,7 @@ public class KnowledgeBaseRepository {
             "gitlab-access.md", List.of(
                     "access", "taotleda", "taotlus", "juurdepaas", "juurdepaasu", "saamine", "juhis", "juhised",
                     "juhiseid", "ligi", "paaseda", "kord", "juhenda", "saamisel", "taotlemise",
+                    "taotluse", "alustada", "alustama", "soovin", "kiire", "kiiresti",
                     "kinnitaja", "kinnitab", "kinnitus", "kestus", "kaua", "aeg", "paev", "paeva"),
             "kubernetes-deploy.md", List.of(
                     "kasutusele votmine", "votta", "paigaldamine", "protsess", "juhis", "juhised", "kuberneteses"),
