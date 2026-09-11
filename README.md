@@ -112,6 +112,10 @@ Aktsepteeritud küsimus saadetakse OpenAI-le koos süsteemiprompti ja kahe lubat
 
 Rakendus ei salvesta vestlusi kettale ega andmebaasi. Sessioonikontekst püsib ainult ühe rakendusprotsessi mälus. Sama `sessionId` teadja saab sama konteksti kasutada, sest ID ei ole autentimisvahend; päris kasutuses tuleb valida ettearvamatu ID. Teadmusbaas sisaldab ainult ülesande jaoks loodud sünteetilist infot. Kasutaja ei tohiks agenti saata paroole, API võtmeid, isikukoode ega muid tundlikke andmeid.
 
+### Tundlike andmete filtreerimise ulatus
+
+Ülesanne nõuab, et tundlikke kasutaja- või teadmusbaasiandmeid, näiteks paroole, isikut tuvastavaid andmeid ja API võtmeid, ei saadetaks OpenAI-le. Enne mudelikõnet blokeerib või redigeerib rakendus seetõttu levinud mehhaaniliselt tuvastatavaid saladusevorminguid ja selgesõnalisi mandaadimustreid. See ei ole täielik andmekao vältimise (DLP) lahendus: suvalises vabas loomulikus keeles esitatud tundliku info ammendav tuvastamine ei ole tehniliselt garanteeritav, sest sama saladust saab ümber sõnastada, hägustada, kodeerida või esitada varem nägemata kujul. Selle riski ulatuslik lahendamine eeldaks teistsugust usalduspiiri, näiteks lokaalset või on-premise semantilist töötlemist, ning jääb selle kontrollitud ja piiratud AI-agendi harjutuse skoopist välja. See on selgesõnaline jääkrisk ja teadaolev piirang, mitte täieliku DLP-kaitse garantii.
+
 ## Testimine
 
 Unit-testid ei vaja OpenAI võtit ega tee päris võrgukutseid:
