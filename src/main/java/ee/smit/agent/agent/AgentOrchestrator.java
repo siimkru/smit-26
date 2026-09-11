@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class AgentOrchestrator implements AgentService {
 
     private static final Pattern TOPIC_LIST_INTENT = Pattern.compile(
-            "\\b(?:mis|millised|millistel|millistest)\\s+teem(?:adel|adest|ad|a)\\b");
+            "\\b(?:mis|millised|millistel|millistest|milliste)\\s+teem(?:adel|adest|adega|ad|a)\\b");
 
     private final RequestSecurityService security;
     private final AgentModelGateway model;

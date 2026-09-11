@@ -34,8 +34,8 @@ public class KnowledgeBaseRepository {
     );
     private static final Map<String, List<String>> TOPIC_ANCHORS = Map.of(
             "gitlab-access.md", List.of("gitlab"),
-            "kubernetes-deploy.md", List.of("kubernetes", "k8s", "helm", "deploy", "juurutamine"),
-            "cicd.md", List.of("ci/cd", "cicd", "pipeline", "deploy", "juurutamine"),
+            "kubernetes-deploy.md", List.of("kubernetes", "k8s", "helm", "deploy", "juurutamine", "juurutada"),
+            "cicd.md", List.of("ci/cd", "cicd", "pipeline", "deploy", "juurutamine", "juurutada"),
             "code-review.md", List.of(
                     "code review", "koodireview", "merge", "pull request", "ulevaataja", "kontrollida", "uhendamine", "kood"),
             "access-management.md", List.of("oigused", "kasutajakonto", "roll")
@@ -51,21 +51,24 @@ public class KnowledgeBaseRepository {
                     "kinnitaja", "kinnitab", "kinnitus", "kinnitamiseks", "kinnitust", "heakskiit", "heakskiidu",
                     "heakskiitu", "juht", "juhile", "kestus", "kaua", "aeg", "paev", "paeva"),
             "kubernetes-deploy.md", List.of(
-                    "kasutusele votmine", "votta", "paigaldamine", "protsess", "juhis", "juhised", "kuberneteses"),
+                    "kasutusele votmine", "votta", "paigaldamine", "protsess", "juhis", "juhised",
+                    "kuberneteses", "juurutada"),
             "cicd.md", List.of(
-                    "kasutusele votmine", "paigaldamine", "protsess", "tootab", "juhis", "juhised"),
+                    "kasutusele votmine", "paigaldamine", "protsess", "tootab", "juhis", "juhised",
+                    "juurutada"),
             "code-review.md", List.of(
                     "koodi ulevaatus", "ule vaatama", "vaadata", "kontrollima", "kontrollida",
-                    "uhendamine", "uhendamist", "juhis", "juhised", "kood"),
+                    "uhendamine", "uhendamist", "juhis", "juhised", "kood", "ulevaatajat",
+                    "pull requestil", "mitu"),
             "access-management.md", List.of(
                     "juurdepaas", "ligipaas", "taotleda", "taotlus", "saamine", "juhis", "juhised")
     );
     private static final Set<String> QUESTION_FRAMING = Set.of(
-            "aga", "aega", "andke", "anna", "do", "enne", "get", "how", "i", "info", "jarel",
-            "iga", "kaib", "kas", "kaudu", "kes", "kui", "kuidas", "kust", "ma", "mis", "mulle", "mul", "on",
-            "palun", "parast", "peab", "probleem", "protsess", "saan", "saab", "saada", "see", "seda",
+            "aga", "aega", "aidata", "andke", "anna", "do", "enne", "get", "how", "i", "info", "ja", "jarel",
+            "iga", "juhtub", "kaib", "kas", "kaudu", "kes", "kui", "kuidas", "kust", "ma", "mis", "mulle", "mul", "on",
+            "oskad", "palun", "parast", "peab", "probleem", "protsess", "saan", "saab", "saada", "see", "seda",
             "selle", "sellest", "teha", "toimub", "ule", "vajaksin", "vaja", "voi", "votab", "lisainfo",
-            "parineb", "et", "kelle", "milline", "mind", "mida", "mu", "pean"
+            "parineb", "et", "kelle", "milline", "mind", "mida", "mu", "olema", "pean", "tere"
     );
 
     private static final List<String> FILE_ORDER = List.of(

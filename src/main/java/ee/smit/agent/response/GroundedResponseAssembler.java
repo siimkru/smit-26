@@ -22,10 +22,11 @@ import java.text.Normalizer;
 public class GroundedResponseAssembler {
 
     private static final Pattern TOPIC_LIST_INTENT = Pattern.compile(
-            "\\b(?:mis|millised|millistel|millistest)\\s+teem(?:adel|adest|ad|a)\\b");
+            "\\b(?:mis|millised|millistel|millistest|milliste)\\s+teem(?:adel|adest|adega|ad|a)\\b");
     private static final Set<String> TOPIC_LIST_ALLOWED_TERMS = Set.of(
-            "mis", "millised", "millistel", "millistest", "teemadel", "teemadest", "teemad", "teema",
-            "teemade", "saad", "mulle", "infot", "anda", "gitlab", "kubernetes", "k8s", "cicd",
+            "mis", "millised", "millistel", "millistest", "milliste", "teemadel", "teemadest", "teemadega",
+            "teemad", "teema", "teemade", "saad", "mulle", "infot", "anda", "oskad", "aidata",
+            "gitlab", "kubernetes", "k8s", "cicd",
             "pipeline", "code", "review", "koodireview", "ligipaas", "haldus", "access");
 
     private static final String GROUNDING_FAILURE =

@@ -74,6 +74,19 @@ class GroundedResponseAssemblerTest {
     }
 
     @Test
+    void acceptsNaturalTopicListWording() {
+        Map<String, KnowledgePassage> evidence = repository.listTopics().stream()
+                .collect(java.util.stream.Collectors.toMap(KnowledgePassage::id, passage -> passage));
+
+        var response = assembler.assemble("Milliste teemadega oskad aidata?", List.of(),
+                new AgentDecision("LIST_TOPICS", repository.listTopics().stream()
+                        .map(KnowledgePassage::id).toList(), null), evidence);
+
+        assertThat(response.refused()).isFalse();
+        assertThat(response.sources()).hasSize(5);
+    }
+
+    @Test
     void doesNotTreatSystemSubstringAsTopicListIntent() {
         List<KnowledgePassage> topics = repository.listTopics();
         Map<String, KnowledgePassage> evidence = topics.stream()

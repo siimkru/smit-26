@@ -129,6 +129,23 @@ class KnowledgeBaseRepositoryTest {
     }
 
     @Test
+    void ignoresConversationalFramingAroundSupportedQuestions() {
+        assertThat(repository.search("Tere! Soovin GitLabi ligipääsu, kuidas seda taotleda?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
+        assertThat(repository.search("Mitu ülevaatajat peab pull requestil olema?"))
+                .extracting(KnowledgePassage::file).containsExactly("code-review.md");
+        assertThat(repository.search("Mis juhtub, kui CI/CD test ebaõnnestub?"))
+                .extracting(KnowledgePassage::file).containsExactly("cicd.md");
+    }
+
+    @Test
+    void returnsEverySupportedTopicForACombinedQuestion() {
+        assertThat(repository.search("Kuidas taotleda ligipääsu GitLabile ja juurutada Kubernetesesse?"))
+                .extracting(KnowledgePassage::file)
+                .containsExactlyInAnyOrder("gitlab-access.md", "kubernetes-deploy.md", "cicd.md");
+    }
+
+    @Test
     void doesNotUseSubstringCollisionsAsKnowledgeEvidence() {
         assertThat(repository.search("Kuidas GitLabine töövoog töötab?")).isEmpty();
         assertThat(repository.search("Mis on Kuberneteslik platvorm?")).isEmpty();
