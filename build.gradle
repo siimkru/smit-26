@@ -28,6 +28,15 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
     compileOnly 'com.github.spotbugs:spotbugs-annotations:4.10.4'
 
+    constraints {
+        implementation('org.apache.tomcat.embed:tomcat-embed-core:11.0.25') {
+            because 'Fixes critical Tomcat authorization and authentication vulnerabilities'
+        }
+        implementation('org.apache.commons:commons-lang3:3.18.0') {
+            because 'Fixes uncontrolled recursion on long inputs'
+        }
+    }
+
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0'
