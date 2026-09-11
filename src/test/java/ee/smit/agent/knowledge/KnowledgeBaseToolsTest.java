@@ -1,6 +1,7 @@
 package ee.smit.agent.knowledge;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.annotation.Tool;
 
@@ -29,12 +30,24 @@ class KnowledgeBaseToolsTest {
 
     @Test
     void springAiCallbackProviderRegistersOnlyAllowlistedTools() {
-        ToolCallbackProvider provider = new KnowledgeBaseToolConfiguration()
-                .knowledgeBaseToolCallbackProvider(tools, allowlist);
+        ToolCallbackProvider provider = callbackProvider();
 
         assertThat(Arrays.stream(provider.getToolCallbacks())
                 .map(callback -> callback.getToolDefinition().name()))
                 .containsExactlyInAnyOrderElementsOf(allowlist.allowedNames());
+    }
+
+    @Test
+    void registeredSearchCallbackUsesTheReadOnlyRepositoryForArguments() {
+        ToolCallback callback = Arrays.stream(callbackProvider().getToolCallbacks())
+                .filter(value -> value.getToolDefinition().name().equals("searchKnowledgeBase"))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(callback.call("{\"query\":\"gitlab ligipääs\"}"))
+                .contains("gitlab-access.md");
+        assertThat(callback.call("{\"query\":\"../../../etc/passwd\"}"))
+                .doesNotContain("root:x:", "/etc/passwd");
     }
 
     @Test
@@ -61,5 +74,10 @@ class KnowledgeBaseToolsTest {
                     assertThat(passage.file()).doesNotContain("/").doesNotContain("\\");
                     assertThat(passage.excerpt()).isNotBlank();
                 });
+    }
+
+    private ToolCallbackProvider callbackProvider() {
+        return new KnowledgeBaseToolConfiguration()
+                .knowledgeBaseToolCallbackProvider(tools, allowlist);
     }
 }
