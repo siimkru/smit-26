@@ -65,6 +65,20 @@ class AgentOrchestratorTest {
     }
 
     @Test
+    void longFollowUpRemainsGroundedAfterTheOriginalQuestionRollsOut() {
+        AgentOrchestrator service = service((question, history) ->
+                new AgentDecision("REFUSE", List.of(), "NOT_FOUND"));
+        String sessionId = "session-rollover";
+
+        service.ask(new AskRequest("Kuidas taotleda ligipääsu GitLabile?", sessionId));
+        for (int turn = 0; turn < 5; turn++) {
+            var response = service.ask(new AskRequest("Kui kaua see võtab aega?", sessionId));
+            assertThat(response.refused()).isFalse();
+            assertThat(response.answer()).contains("1–2 tööpäeva", "[allikas: gitlab-access.md]");
+        }
+    }
+
+    @Test
     void refusesUnsafeInputBeforeCallingModel() {
         AtomicInteger calls = new AtomicInteger();
         AgentModelGateway gateway = (question, history) -> {

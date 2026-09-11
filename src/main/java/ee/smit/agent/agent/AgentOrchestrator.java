@@ -68,10 +68,37 @@ public class AgentOrchestrator implements AgentService {
             if (remaining <= 0) {
                 break;
             }
-            query.append(' ').append(exchange.question(), 0,
-                    Math.min(remaining, exchange.question().length()));
+            appendBounded(query, exchange.question(), remaining);
+            remaining = KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH - query.length() - 1;
+            if (remaining > 0) {
+                appendSourceAnchors(query, exchange.answer(), remaining);
+            }
         }
         return query.toString();
+    }
+
+    private void appendSourceAnchors(StringBuilder query, String answer, int remaining) {
+        String marker = "[allikas: ";
+        int from = 0;
+        while (remaining > 0) {
+            int markerStart = answer.indexOf(marker, from);
+            if (markerStart < 0) {
+                return;
+            }
+            int fileStart = markerStart + marker.length();
+            int fileEnd = answer.indexOf(']', fileStart);
+            if (fileEnd < 0) {
+                return;
+            }
+            String file = answer.substring(fileStart, fileEnd).replaceFirst("\\.md$", "");
+            appendBounded(query, file, remaining);
+            remaining = KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH - query.length() - 1;
+            from = fileEnd + 1;
+        }
+    }
+
+    private void appendBounded(StringBuilder query, String value, int remaining) {
+        query.append(' ').append(value, 0, Math.min(remaining, value.length()));
     }
 
     private boolean isTopicListQuestion(String question) {
