@@ -181,17 +181,22 @@ public class GroundedResponseAssembler {
         if (!isFollowUp(question) || history.isEmpty()) {
             return Set.of();
         }
-        String contextualQuery = boundedContextualQuery(question, history.getLast().question());
+        String contextualQuery = boundedContextualQuery(question, history);
         return repository.search(contextualQuery).stream().map(KnowledgePassage::id)
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
     }
 
-    private String boundedContextualQuery(String question, String previousQuestion) {
-        int remaining = KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH - question.length() - 1;
-        if (remaining <= 0) {
-            return question.substring(0, KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH);
+    private String boundedContextualQuery(String question, List<AgentExchange> history) {
+        StringBuilder query = new StringBuilder(question);
+        for (AgentExchange exchange : history) {
+            int remaining = KnowledgeBaseRepository.MAX_SEARCH_QUERY_LENGTH - query.length() - 1;
+            if (remaining <= 0) {
+                break;
+            }
+            query.append(' ').append(exchange.question(), 0,
+                    Math.min(remaining, exchange.question().length()));
         }
-        return question + " " + previousQuestion.substring(0, Math.min(remaining, previousQuestion.length()));
+        return query.toString();
     }
 
     private boolean isTopicListQuestion(String question) {

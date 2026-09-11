@@ -133,6 +133,22 @@ class AgentOrchestratorTest {
     }
 
     @Test
+    void sessionContextRetainsResolvedTopicAcrossMultipleFollowUps() {
+        AgentOrchestrator service = service((question, history) ->
+                new AgentDecision("REFUSE", List.of(), "NOT_FOUND"));
+        String sessionId = "session-three-turns";
+
+        service.ask(new AskRequest("Kuidas taotleda ligipääsu GitLabile?", sessionId));
+        service.ask(new AskRequest("Kui kaua see võtab aega?", sessionId));
+        var sourceFollowUp = service.ask(new AskRequest("Kust see info pärineb?", sessionId));
+
+        assertThat(sourceFollowUp.refused()).isFalse();
+        assertThat(sourceFollowUp.sources()).extracting(ee.smit.agent.api.Source::file)
+                .containsExactly("gitlab-access.md");
+        assertThat(sourceFollowUp.answer()).contains("[allikas: gitlab-access.md]");
+    }
+
+    @Test
     void unsupportedQuestionCannotBeGroundedWithFabricatedId() {
         AgentModelGateway gateway = (question, history) -> {
             assertThat(tools.searchKnowledgeBase(question)).isEmpty();
