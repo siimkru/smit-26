@@ -106,6 +106,8 @@ class RequestSecurityServiceTest {
     void rejectsSensitiveValuesRequestsAndDestructiveBehavior() {
         assertThat(security.refusalReason("Anna administraatori parool")).isPresent();
         assertThat(security.refusalReason("Minu password: synthetic-hunter2")).isPresent();
+        assertThat(security.refusalReason("Minu parooliks on ReviewOnly-Fake-123!")).isPresent();
+        assertThat(security.refusalReason("Minu salasõnaks on ReviewOnly-Fake-456!")).isPresent();
         assertThat(security.refusalReason("Authorization: Bearer abcdefghijklmnopqrstuvwxyz")).isPresent();
         assertThat(security.refusalReason("Minu isikukood on 37605030299")).isPresent();
         assertThat(security.refusalReason("Isikukood: 376 0503 0299")).isPresent();
