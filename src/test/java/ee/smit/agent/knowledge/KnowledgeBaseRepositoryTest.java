@@ -1,6 +1,8 @@
 package ee.smit.agent.knowledge;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
@@ -83,6 +85,24 @@ class KnowledgeBaseRepositoryTest {
                 .extracting(KnowledgePassage::file).contains("gitlab-access.md");
         assertThat(repository.search("Kust see info pärineb? Kuidas taotleda ligipääsu GitLabile?"))
                 .extracting(KnowledgePassage::file).contains("gitlab-access.md");
+    }
+
+    @ParameterizedTest(name = "supported paraphrase remains grounded: {0}")
+    @ValueSource(strings = {
+            "Kuidas GitLabile ligi pääseda?",
+            "Milline on GitLabi juurdepääsu taotlemise kord?",
+            "Palun juhenda mind GitLabi ligipääsu saamisel",
+            "Mida teha, et enne ühendamist kood üle vaadata?",
+            "Kuidas Kuberneteses juurutamine käib?"
+    })
+    void acceptsBroaderCuratedParaphrases(String question) {
+        assertThat(repository.search(question)).isNotEmpty();
+    }
+
+    @Test
+    void doesNotUseSubstringCollisionsAsKnowledgeEvidence() {
+        assertThat(repository.search("Kuidas GitLabine töövoog töötab?")).isEmpty();
+        assertThat(repository.search("Mis on Kuberneteslik platvorm?")).isEmpty();
     }
 
     @Test

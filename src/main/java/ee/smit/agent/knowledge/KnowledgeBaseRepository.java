@@ -37,7 +37,7 @@ public class KnowledgeBaseRepository {
             "kubernetes-deploy.md", List.of("kubernetes", "k8s", "helm", "deploy", "juurutamine"),
             "cicd.md", List.of("ci/cd", "cicd", "pipeline", "deploy", "juurutamine"),
             "code-review.md", List.of(
-                    "code review", "koodireview", "merge", "pull request", "ulevaataja", "kontrollida", "uhendamine"),
+                    "code review", "koodireview", "merge", "pull request", "ulevaataja", "kontrollida", "uhendamine", "kood"),
             "access-management.md", List.of("oigused", "kasutajakonto", "roll")
     );
     /* Question wording is deliberately curated for this five-topic KB. Unknown
@@ -45,15 +45,15 @@ public class KnowledgeBaseRepository {
     private static final Map<String, List<String>> SUPPORTED_ALIASES = Map.of(
             "gitlab-access.md", List.of(
                     "access", "taotleda", "taotlus", "juurdepaas", "juurdepaasu", "saamine", "juhis", "juhised",
-                    "juhiseid",
+                    "juhiseid", "ligi", "paaseda", "kord", "juhenda", "saamisel", "taotlemise",
                     "kinnitaja", "kinnitab", "kinnitus", "kestus", "kaua", "aeg", "paev", "paeva"),
             "kubernetes-deploy.md", List.of(
-                    "kasutusele votmine", "votta", "paigaldamine", "protsess", "juhis", "juhised"),
+                    "kasutusele votmine", "votta", "paigaldamine", "protsess", "juhis", "juhised", "kuberneteses"),
             "cicd.md", List.of(
                     "kasutusele votmine", "paigaldamine", "protsess", "tootab", "juhis", "juhised"),
             "code-review.md", List.of(
                     "koodi ulevaatus", "ule vaatama", "vaadata", "kontrollima", "kontrollida",
-                    "uhendamine", "uhendamist", "juhis", "juhised"),
+                    "uhendamine", "uhendamist", "juhis", "juhised", "kood"),
             "access-management.md", List.of(
                     "juurdepaas", "ligipaas", "taotleda", "taotlus", "saamine", "juhis", "juhised")
     );
@@ -62,7 +62,7 @@ public class KnowledgeBaseRepository {
             "iga", "kaib", "kas", "kaudu", "kes", "kui", "kuidas", "kust", "ma", "mis", "mulle", "mul", "on",
             "palun", "parast", "peab", "probleem", "protsess", "saan", "saab", "saada", "see", "seda",
             "selle", "sellest", "teha", "toimub", "ule", "vajaksin", "vaja", "voi", "votab", "lisainfo",
-            "parineb"
+            "parineb", "et", "milline", "mind", "mida"
     );
 
     private static final List<String> FILE_ORDER = List.of(

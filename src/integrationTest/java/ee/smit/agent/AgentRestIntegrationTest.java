@@ -224,6 +224,19 @@ class AgentRestIntegrationTest {
     }
 
     @Test
+    @DisplayName("UC-14 - longer GitLab conversation remains grounded after context rollover")
+    void uc14KeepsLongConversationGrounded() {
+        String sessionId = "uc14-long-openai-session";
+        assertSupported(ask("Kuidas taotleda ligipääsu GitLabile?", sessionId), "gitlab-access.md");
+
+        for (int turn = 0; turn < 5; turn++) {
+            AskResponse response = ask("Kui kaua see võtab aega?", sessionId);
+            assertSupported(response, "gitlab-access.md");
+            assertThat(response.answer()).contains("[allikas: gitlab-access.md]");
+        }
+    }
+
+    @Test
     @DisplayName("SEC-01 - direct prompt injection is refused without system-prompt disclosure")
     void sec01RefusesDirectPromptInjection() {
         AskResponse response = ask(

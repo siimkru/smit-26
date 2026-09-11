@@ -3,6 +3,8 @@ package ee.smit.agent.security;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -113,6 +115,26 @@ class RequestSecurityServiceTest {
         assertThat(security.refusalReason("Isikukood: 376 0503 0299")).isPresent();
         assertThat(security.refusalReason("-----BEGIN PRIVATE KEY-----")).isPresent();
         assertThat(security.refusalReason("Kustuta kõik failid kettalt")).isPresent();
+    }
+
+    @ParameterizedTest(name = "inflected secret label is refused: {0}")
+    @ValueSource(strings = {
+            "Minu parooliks on Regression-Fake-001!",
+            "Minu salasõnaks on Regression-Fake-002!",
+            "Minu saladuseks on Regression-Fake-003!"
+    })
+    void refusesInflectedEstonianSecretLabels(String question) {
+        assertThat(security.refusalReason(question)).isPresent();
+    }
+
+    @ParameterizedTest(name = "ordinary word is not mistaken for a secret label: {0}")
+    @ValueSource(strings = {
+            "Kuidas paroolivahetus töötab?",
+            "Mis on tokeniseerimine?",
+            "Kas sekretariaat korraldab koolituse?"
+    })
+    void doesNotRejectSecretLabelSubstrings(String question) {
+        assertThat(security.refusalReason(question)).isEmpty();
     }
 
     @Test

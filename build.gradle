@@ -38,6 +38,7 @@ dependencies {
     }
 
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testCompileOnly 'com.github.spotbugs:spotbugs-annotations:4.10.4'
 
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0'
 }

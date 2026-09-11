@@ -149,6 +149,36 @@ class AgentOrchestratorTest {
     }
 
     @Test
+    void longSessionRetainsOnlyRecentContextWhileGroundingEveryTurn() {
+        List<List<AgentExchange>> observedHistory = new ArrayList<>();
+        AgentModelGateway gateway = (question, history) -> {
+            observedHistory.add(history);
+            var passage = tools.searchKnowledgeBase("gitlab").getFirst();
+            return new AgentDecision("ANSWER", List.of(passage.id()), null);
+        };
+        AgentOrchestrator service = service(gateway);
+        String sessionId = "session-long-regression";
+        List<String> questions = List.of(
+                "Kuidas taotleda ligipääsu GitLabile?",
+                "gitlab ligipääs?",
+                "Kuidas GitLabi juurdepääsu saada?",
+                "How do I get GitLab access?",
+                "Kust see info pärineb? Kuidas taotleda ligipääsu GitLabile?",
+                "Palun juhenda mind GitLabi ligipääsu saamisel");
+
+        for (String question : questions) {
+            var response = service.ask(new AskRequest(question, sessionId));
+            assertThat(response.refused()).isFalse();
+            assertThat(response.sources()).extracting(ee.smit.agent.api.Source::file)
+                    .containsExactly("gitlab-access.md");
+        }
+
+        assertThat(observedHistory).hasSize(questions.size());
+        assertThat(observedHistory.get(5)).extracting(AgentExchange::question)
+                .containsExactlyElementsOf(questions.subList(1, 5));
+    }
+
+    @Test
     void unsupportedQuestionCannotBeGroundedWithFabricatedId() {
         AgentModelGateway gateway = (question, history) -> {
             assertThat(tools.searchKnowledgeBase(question)).isEmpty();
