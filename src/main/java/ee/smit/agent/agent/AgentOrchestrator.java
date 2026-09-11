@@ -19,7 +19,8 @@ import java.util.regex.Pattern;
 @Service
 public class AgentOrchestrator implements AgentService {
 
-    private static final Pattern TOPIC_WORD = Pattern.compile("(?:^|\\s)teem(?:a|al|adel|ad|ade|ast|aga)?(?:$|\\s|[?!.,:])");
+    private static final Pattern TOPIC_LIST_INTENT = Pattern.compile(
+            "\\b(?:mis|millised|millistel|millistest)\\s+teem(?:adel|adest|ad|a)\\b");
 
     private final RequestSecurityService security;
     private final AgentModelGateway model;
@@ -105,7 +106,7 @@ public class AgentOrchestrator implements AgentService {
     }
 
     private boolean isTopicListQuestion(String question) {
-        return TOPIC_WORD.matcher(normalize(question)).find();
+        return TOPIC_LIST_INTENT.matcher(normalize(question)).find();
     }
 
     private String normalize(String value) {

@@ -21,7 +21,8 @@ import java.text.Normalizer;
 @Component
 public class GroundedResponseAssembler {
 
-    private static final Pattern TOPIC_WORD = Pattern.compile("(?:^|\\s)teem(?:a|al|adel|ad|ade|ast|aga)?(?:$|\\s|[?!.,:])");
+    private static final Pattern TOPIC_LIST_INTENT = Pattern.compile(
+            "\\b(?:mis|millised|millistel|millistest)\\s+teem(?:adel|adest|ad|a)\\b");
 
     private static final String GROUNDING_FAILURE =
             "Vastust ei saanud usaldusväärselt siduda teadmusbaasi allikaga.";
@@ -230,7 +231,7 @@ public class GroundedResponseAssembler {
     }
 
     private boolean isTopicListQuestion(String question) {
-        return TOPIC_WORD.matcher(normalize(question)).find();
+        return TOPIC_LIST_INTENT.matcher(normalize(question)).find();
     }
 
     private boolean isDeployQuestion(String question) {

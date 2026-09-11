@@ -87,6 +87,19 @@ class GroundedResponseAssemblerTest {
     }
 
     @Test
+    void doesNotTreatAnUnrelatedTopicMentionAsTopicListIntent() {
+        List<KnowledgePassage> topics = repository.listTopics();
+        Map<String, KnowledgePassage> evidence = topics.stream()
+                .collect(java.util.stream.Collectors.toMap(KnowledgePassage::id, passage -> passage));
+
+        var response = assembler.assemble("Räägi teemal dinosaurused.", List.of(),
+                new AgentDecision("REFUSE", List.of(), "OUT_OF_SCOPE"), evidence);
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.sources()).isEmpty();
+    }
+
+    @Test
     void preservesEverySelectedSourceAndHumanReadableCitation() {
         KnowledgePassage kubernetes = repository.search("kubernetes").getFirst();
         KnowledgePassage cicd = repository.search("ci/cd pipeline").getFirst();
