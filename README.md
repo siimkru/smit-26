@@ -152,8 +152,8 @@ Unit-testid ja staatilised kontrollid ei saa OpenAI-võtit. Live-workflow käivi
 
 Varasema kontrollitud commit'i `3d6c3fb` workflow-jooksud ja nende raportid:
 
-- [Unit tests](https://github.com/siimkru/smit-26/actions/runs/34553618636) — unit-testid ja staatilised kontrollid; artefakt `unit-test-html-report`.
-- [Integration tests](https://github.com/siimkru/smit-26/actions/runs/34553655813) — päris OpenAI integratsioonitestid; artefakt `integration-test-html-report`.
+- [Unit tests](https://github.com/siimkru/smit-26/actions/runs/34613241464) — unit-testid ja staatilised kontrollid; artefakt `unit-test-html-report`.
+- [Integration tests](https://github.com/siimkru/smit-26/actions/runs/34613275907) — päris OpenAI integratsioonitestid; artefakt `integration-test-html-report`.
 
 Hindamiseks vajalik päris integratsioonijooks tuleb teha võtmega lokaalselt või seadistada `openai-integration` Environment'i saladused ja käivitada live-workflow käsitsi. Workflow lehtedel on nähtavad jooksude täpsed tulemused ja allalaaditavad raportid. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
 
