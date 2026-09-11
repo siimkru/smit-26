@@ -14,9 +14,12 @@ import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class AgentOrchestrator implements AgentService {
+
+    private static final Pattern TOPIC_WORD = Pattern.compile("(?:^|\\s)teem(?:a|al|adel|ad|ade|ast|aga)?(?:$|\\s|[?!.,:])");
 
     private final RequestSecurityService security;
     private final AgentModelGateway model;
@@ -102,7 +105,7 @@ public class AgentOrchestrator implements AgentService {
     }
 
     private boolean isTopicListQuestion(String question) {
-        return normalize(question).contains("teem");
+        return TOPIC_WORD.matcher(normalize(question)).find();
     }
 
     private String normalize(String value) {

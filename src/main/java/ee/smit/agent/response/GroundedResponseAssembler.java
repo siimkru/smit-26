@@ -14,11 +14,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.text.Normalizer;
 
 /** Final trust boundary: only canonical current-turn KB text reaches factual API answers. */
 @Component
 public class GroundedResponseAssembler {
+
+    private static final Pattern TOPIC_WORD = Pattern.compile("(?:^|\\s)teem(?:a|al|adel|ad|ade|ast|aga)?(?:$|\\s|[?!.,:])");
 
     private static final String GROUNDING_FAILURE =
             "Vastust ei saanud usaldusväärselt siduda teadmusbaasi allikaga.";
@@ -227,7 +230,7 @@ public class GroundedResponseAssembler {
     }
 
     private boolean isTopicListQuestion(String question) {
-        return normalize(question).contains("teem");
+        return TOPIC_WORD.matcher(normalize(question)).find();
     }
 
     private boolean isDeployQuestion(String question) {
