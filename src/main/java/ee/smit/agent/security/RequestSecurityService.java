@@ -52,8 +52,8 @@ public class RequestSecurityService {
             Pattern.compile("(?<!\\d)\\d{11}(?!\\d)")
     );
     private static final Pattern LABELED_SECRET = Pattern.compile(
-            "\\b(?:password|passwd|parool(?:iks)?|salasona(?:ks)?|saladus(?:eks)?|"
-                    + "api[ _-]?(?:key|voti)|access[ _-]?token|secret)"
+            "\\b(?:password|passwd|parool(?:i|iks)?|salasona(?:ks)?|saladus(?:eks)?|"
+                    + "api[ _-]?(?:key|voti)|(?:access[ _-]?)?token|secret)"
                     + "(?:[\\\"']?\\s*(?::|=)\\s*[\\\"']?\\S+"
                     + "|\\s+(?:(?:\\bis\\b|\\bon\\b|\\bwould\\b|\\boleks\\b)\\s+)?\\S+)");
     private static final Pattern LABELED_PERSONAL_ID = Pattern.compile(

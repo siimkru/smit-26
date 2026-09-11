@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,6 +120,25 @@ class AgentOrchestratorTest {
 
         var response = service(gateway).ask(new AskRequest(
                 "GitLab password=Regression-Fake-010!", null));
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.sources()).isEmpty();
+        assertThat(calls).hasValue(0);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "GitLab token=Regression-Fake-010!",
+            "Kasuta GitLabi parooli Regression-Fake-011!"
+    })
+    void refusesAdditionalCredentialFormsBeforeCallingModel(String question) {
+        AtomicInteger calls = new AtomicInteger();
+        AgentModelGateway gateway = (ignoredQuestion, history) -> {
+            calls.incrementAndGet();
+            return new AgentDecision("REFUSE", List.of(), "UNSAFE");
+        };
+
+        var response = service(gateway).ask(new AskRequest(question, null));
 
         assertThat(response.refused()).isTrue();
         assertThat(response.sources()).isEmpty();

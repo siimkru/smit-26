@@ -141,7 +141,9 @@ class RequestSecurityServiceTest {
             "GitLab password=Regression-Fake-006!",
             "GitLab password:Regression-Fake-007!",
             "GitLab parool=Regression-Fake-008!",
-            "GitLab api-key=Regression-Fake-009!"
+            "GitLab api-key=Regression-Fake-009!",
+            "GitLab token=Regression-Fake-010!",
+            "Kasuta GitLabi parooli Regression-Fake-011!"
     })
     void refusesCompactCredentialAssignments(String question) {
         assertThat(security.refusalReason(question)).isPresent();
