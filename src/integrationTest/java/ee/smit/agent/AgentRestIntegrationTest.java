@@ -75,7 +75,7 @@ class AgentRestIntegrationTest {
         assertThat(body.hasNonNull("refused")).isTrue();
         assertThat(body.has("refusalReason")).isTrue();
         assertThat(body.get("refused").asBoolean()).isFalse();
-        assertThat(body.get("answer").asText()).contains("[allikas:");
+        assertThat(body.get("answer").asString()).contains("[allikas:");
     }
 
     @Test
