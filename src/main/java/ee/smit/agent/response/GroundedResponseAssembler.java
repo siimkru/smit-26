@@ -23,6 +23,10 @@ public class GroundedResponseAssembler {
 
     private static final Pattern TOPIC_LIST_INTENT = Pattern.compile(
             "\\b(?:mis|millised|millistel|millistest)\\s+teem(?:adel|adest|ad|a)\\b");
+    private static final Set<String> TOPIC_LIST_ALLOWED_TERMS = Set.of(
+            "mis", "millised", "millistel", "millistest", "teemadel", "teemadest", "teemad", "teema",
+            "teemade", "saad", "mulle", "infot", "anda", "gitlab", "kubernetes", "k8s", "cicd",
+            "pipeline", "code", "review", "koodireview", "ligipaas", "haldus", "access");
 
     private static final String GROUNDING_FAILURE =
             "Vastust ei saanud usaldusväärselt siduda teadmusbaasi allikaga.";
@@ -51,7 +55,7 @@ public class GroundedResponseAssembler {
         AskResponse response = switch (normalizedAction) {
             case "ANSWER" -> answer(decision.selectedPassageIds(), currentEvidence,
                     eligibleAnswerIds(question, history));
-            case "LIST_TOPICS" -> isTopicListQuestion(question)
+            case "LIST_TOPICS" -> isSupportedTopicListQuestion(question)
                     ? topicList(decision.selectedPassageIds(), currentEvidence)
                     : refusal(GROUNDING_FAILURE);
             case "CLARIFY" -> isDeployQuestion(question)
@@ -94,7 +98,7 @@ public class GroundedResponseAssembler {
     private AskResponse recoverSupportedAnswer(String question, List<AgentExchange> history,
                                                 Map<String, KnowledgePassage> evidence,
                                                 String refusalReason) {
-        if (isTopicListQuestion(question)
+        if (isSupportedTopicListQuestion(question)
                 && evidence.keySet().containsAll(allTopicIds)) {
             return topicList(repository.listTopics().stream()
                     .map(KnowledgePassage::id)
@@ -232,6 +236,15 @@ public class GroundedResponseAssembler {
 
     private boolean isTopicListQuestion(String question) {
         return TOPIC_LIST_INTENT.matcher(normalize(question)).find();
+    }
+
+    private boolean isSupportedTopicListQuestion(String question) {
+        if (!isTopicListQuestion(question)) {
+            return false;
+        }
+        return java.util.Arrays.stream(normalize(question).split("[^a-z0-9]+"))
+                .filter(token -> !token.isBlank())
+                .allMatch(TOPIC_LIST_ALLOWED_TERMS::contains);
     }
 
     private boolean isDeployQuestion(String question) {

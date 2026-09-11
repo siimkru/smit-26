@@ -100,6 +100,19 @@ class GroundedResponseAssemblerTest {
     }
 
     @Test
+    void refusesTopicListRequestWithUnsupportedQualifier() {
+        List<KnowledgePassage> topics = repository.listTopics();
+        Map<String, KnowledgePassage> evidence = topics.stream()
+                .collect(java.util.stream.Collectors.toMap(KnowledgePassage::id, passage -> passage));
+
+        var response = assembler.assemble("Mis teemadel saad infot anda Marsi serveri kohta?", List.of(),
+                new AgentDecision("ANSWER", List.of(), null), evidence);
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.sources()).isEmpty();
+    }
+
+    @Test
     void preservesEverySelectedSourceAndHumanReadableCitation() {
         KnowledgePassage kubernetes = repository.search("kubernetes").getFirst();
         KnowledgePassage cicd = repository.search("ci/cd pipeline").getFirst();
