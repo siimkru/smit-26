@@ -84,6 +84,7 @@ class AgentRestIntegrationTest {
         AskResponse response = askThroughRealModel("Kuidas taotleda ligipääsu GitLabile?");
 
         assertSupported(response, "gitlab-access.md");
+        verify(knowledgeBaseTools, atLeast(2)).searchKnowledgeBase(anyString());
     }
 
     @Test
@@ -350,9 +351,6 @@ class AgentRestIntegrationTest {
         clearInvocations(knowledgeBaseTools);
         AskResponse response = ask(question, null);
         verify(modelGateway).decide(eq(question), anyList());
-        // One search is the deterministic pre-search. A second invocation proves
-        // that the live Spring AI exchange executed the registered callback.
-        verify(knowledgeBaseTools, atLeast(2)).searchKnowledgeBase(anyString());
         return response;
     }
 
