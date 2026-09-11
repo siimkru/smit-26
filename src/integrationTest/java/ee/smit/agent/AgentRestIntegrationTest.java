@@ -6,6 +6,7 @@ import ee.smit.agent.api.AskRequest;
 import ee.smit.agent.api.AskResponse;
 import ee.smit.agent.api.Source;
 import ee.smit.agent.knowledge.KnowledgeBaseRepository;
+import ee.smit.agent.knowledge.KnowledgeBaseTools;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -47,6 +50,9 @@ class AgentRestIntegrationTest {
 
     @MockitoSpyBean
     private AgentModelGateway modelGateway;
+
+    @MockitoSpyBean
+    private KnowledgeBaseTools knowledgeBaseTools;
 
     @Test
     @DisplayName("API-04 - real OpenAI response has the required public JSON structure")
@@ -341,8 +347,12 @@ class AgentRestIntegrationTest {
 
     private AskResponse askThroughRealModel(String question) {
         clearInvocations(modelGateway);
+        clearInvocations(knowledgeBaseTools);
         AskResponse response = ask(question, null);
         verify(modelGateway).decide(eq(question), anyList());
+        // One search is the deterministic pre-search. A second invocation proves
+        // that the live Spring AI exchange executed the registered callback.
+        verify(knowledgeBaseTools, atLeast(2)).searchKnowledgeBase(anyString());
         return response;
     }
 
