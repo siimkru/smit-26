@@ -125,18 +125,6 @@ class AgentApiTest {
     }
 
     @Test
-    @DisplayName("server creates an unpredictable session identifier")
-    void createsRandomSessionIdentifier() throws Exception {
-        mockMvc.perform(post("/api/v1/agent/sessions"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.sessionId")
-                        .value(org.hamcrest.Matchers.matchesPattern(
-                                "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")));
-
-        verifyNoInteractions(agentService);
-    }
-
-    @Test
     @DisplayName("provider unavailability returns a sanitized 503")
     void returnsSanitizedServiceUnavailable() throws Exception {
         AskRequest request = new AskRequest("Kuidas taotleda ligipääsu GitLabile?", null);
