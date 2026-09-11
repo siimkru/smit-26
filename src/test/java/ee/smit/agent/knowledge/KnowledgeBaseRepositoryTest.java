@@ -69,8 +69,15 @@ class KnowledgeBaseRepositoryTest {
     void topicMatchDoesNotGroundUnsupportedGitlabConditions() {
         assertThat(repository.search("Kas GitLabi ligipääs maksab 50 eurot?")).isEmpty();
         assertThat(repository.search("Kas GitLabi ligipääsuks peab läbima polügraafi?")).isEmpty();
+        assertThat(repository.search("Kas GitLabi ligipääs luuakse 9 tööpäeva jooksul?")).isEmpty();
         assertThat(repository.search(
                 "Kuidas taotleda GitLabi ligipääsu ja kas selleks peab läbima polügraafi?")).isEmpty();
+    }
+
+    @Test
+    void retainsSupportedNumericDetailsAsEvidence() {
+        assertThat(repository.search("Kas GitLabi ligipääs luuakse 1–2 tööpäeva jooksul?"))
+                .extracting(KnowledgePassage::file).containsExactly("gitlab-access.md");
     }
 
     @Test

@@ -208,7 +208,7 @@ public class KnowledgeBaseRepository {
         String[] parts = NON_ALPHANUMERIC.split(normalized);
         Set<String> result = new java.util.LinkedHashSet<>();
         for (String part : parts) {
-            if (part.length() >= 2) {
+            if (part.length() >= 2 || part.chars().allMatch(Character::isDigit)) {
                 result.add(part);
             }
         }
