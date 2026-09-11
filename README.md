@@ -8,7 +8,7 @@ Projekt kasutab Java 21, Spring Boot 4.1.1, Spring AI 2.0.1, OpenAI mudelit ja G
 
 Üks sünkroonne Spring Booti rakendus teenindab REST API-t. Viis sünteetilist Markdown-faili laaditakse käivitamisel fikseeritud classpath-manifestist muutumatusse mällu. Spring AI-le registreeritakse täpselt kaks read-only tööriista: `listTopics` ja `searchKnowledgeBase`. Üldist failisüsteemi-, võrgu-, andmebaasi- ega käsutööriista ei ole.
 
-OpenAI mudel tagastab suletud sisemise otsuse (`ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`) ja valitud lõikude ID-d. Rakendus lubab ainult sama päringu tööriistakutsetega saadud kanoonilisi ID-sid, kontrollib nende seost küsimusega ning koostab `answer`-i, `sources`-i, viited ja usaldustaseme ise. Staatiline märksõnaotsing sobib viie väikese dokumendi jaoks ja hoiab lahenduse auditeeritavana; vektorandmebaas ja embeddings ei ole selle ülesande jaoks vajalikud.
+OpenAI mudel tagastab suletud sisemise otsuse (`ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`) ja valitud lõikude ID-d. Rakendus lubab ainult sama päringu tööriistakutsetega saadud kanoonilisi ID-sid, kontrollib nende seost küsimusega ning koostab `answer`-i, `sources`-i, viited ja usaldustaseme ise. Staatiline märksõna- ja aliaseotsing eristab vestluslikku sõnastust küsitud faktidest ning sobib viie väikese dokumendi jaoks; vektorandmebaas ja embeddings ei ole selle ülesande jaoks vajalikud.
 
 Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratud sama 2 000 tähemärgiga nagu API küsimus.
 
@@ -131,7 +131,7 @@ set +a
 ./gradlew integrationTest
 ```
 
-Testid käivitavad rakenduse juhuslikul lokaalsel pordil ja läbivad REST → agent → Spring AI → OpenAI voo. Kaetud on API-04, UC-01–UC-13, GROUND-01–GROUND-02 ning SEC-01–SEC-06 ja SEC-08. Mudelivoo positiivsed stsenaariumid kontrollivad nüüd ka seda, et lubatud teadmusriba otsingu callback käivitub lisaks rakenduse deterministlikule eeltöötlusele. Path traversal (SEC-06) ja muud tuvastatud ründemustrid peatatakse enne mudelit; semantilised variandid jõuavad mudelini ning nende väljund kontrollitakse. Väited kontrollivad stabiilseid käitumisinvariante, allikafaile ja keeldumisi, mitte mudeli sõnastust. SEC-07 on võtmeta API-test, sest liiga pikk sisend peab peatuma enne mudelikõnet. `integrationTest` kontrollib enne testide käivitamist, et `OPENAI_API_KEY` ja `OPENAI_MODEL` on mittetühjad; puuduvate väärtustega lõpeb task veaga, mitte edukalt vahelejätmisega.
+Testid käivitavad rakenduse juhuslikul lokaalsel pordil ja läbivad REST → agent → Spring AI → OpenAI voo. Kaetud on API-04, UC-01–UC-13, GROUND-01–GROUND-02 ning SEC-01–SEC-06 ja SEC-08. UC-01 kontrollib eraldi, et mudel kutsub lubatud teadmusriba otsingu callback'i lisaks rakenduse deterministlikule eeltöötlusele. Path traversal (SEC-06) ja muud tuvastatud ründemustrid peatatakse enne mudelit; semantilised variandid jõuavad mudelini ning nende väljund kontrollitakse. Väited kontrollivad stabiilseid käitumisinvariante, allikafaile ja keeldumisi, mitte mudeli sõnastust. SEC-07 on võtmeta API-test, sest liiga pikk sisend peab peatuma enne mudelikõnet. `integrationTest` kontrollib enne testide käivitamist, et `OPENAI_API_KEY` ja `OPENAI_MODEL` on mittetühjad; puuduvate väärtustega lõpeb task veaga, mitte edukalt vahelejätmisega.
 
 Gradle genereerib eraldi inimloetavad HTML raportid:
 
@@ -150,7 +150,7 @@ Teised workflow'd on [Live OpenAI integration tests](https://github.com/siimkru/
 
 Unit-testid ja staatilised kontrollid ei saa OpenAI-võtit. Live-workflow käivitub ainult käsitsi, kasutab `openai-integration` Environment'i, käivitab `./gradlew integrationTest` ja avaldab raporti artefaktina `integration-test-html-report` ka testi ebaõnnestumise korral. CodeQL käivitub push'i, pull request'i, käsitsi ja kord nädalas; workflow-analysis käivitub push'i, pull request'i ja käsitsi; dependency submission push'i ja käsitsi; Scorecard push'i, käsitsi ja kord nädalas.
 
-Esitatud testitulemuste workflow-jooksud ja nende raportid:
+Varasema kontrollitud commit'i `3d6c3fb` workflow-jooksud ja nende raportid:
 
 - [Unit tests](https://github.com/siimkru/smit-26/actions/runs/34553618636) — unit-testid ja staatilised kontrollid; artefakt `unit-test-html-report`.
 - [Integration tests](https://github.com/siimkru/smit-26/actions/runs/34553655813) — päris OpenAI integratsioonitestid; artefakt `integration-test-html-report`.

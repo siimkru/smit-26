@@ -1,6 +1,6 @@
 # Arhitektuuri ja turvalisuse kokkuvõte
 
-Lahendus on üks sünkroonne Java 21 ja Spring Booti REST-rakendus. `POST /api/v1/agent/ask` saadab valideeritud küsimuse Spring AI kaudu OpenAI mudelile; `GET /api/v1/health` on lokaalne tervisekontroll ega kutsu OpenAI-d. Viis sünteetilist Markdown-dokumenti laaditakse käivitamisel fikseeritud classpath-manifestist mällu. Väikese ja muutumatu korpuse tõttu kasutatakse deterministlikku märksõnaotsingut, mitte embeddings'e ega vektorandmebaasi.
+Lahendus on üks sünkroonne Java 21 ja Spring Booti REST-rakendus. `POST /api/v1/agent/ask` saadab valideeritud küsimuse Spring AI kaudu OpenAI mudelile; `GET /api/v1/health` on lokaalne tervisekontroll ega kutsu OpenAI-d. Viis sünteetilist Markdown-dokumenti laaditakse käivitamisel fikseeritud classpath-manifestist mällu. Väikese ja muutumatu korpuse tõttu kasutatakse deterministlikku märksõna- ja aliaseotsingut, mitte embeddings'e ega vektorandmebaasi.
 
 Mudelile on allowlist'iga nähtavad ainult kaks read-only tööriista: teemade loetlemine ja teadmusbaasist otsimine. Tööriistad ei võta vastu failiteed, ei kirjuta andmeid, ei käivita käske ega kasuta võrku. Kasutaja otsingustring ei saa muuta laaditavate ressursside nimekirja. Otsing ja kontekstipäringud on piiratud 2 000 tähemärgiga.
 

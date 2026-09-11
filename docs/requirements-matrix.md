@@ -18,7 +18,7 @@
 | `refused:false` nõuab allikaid ja inimloetavaid viiteid | `CurrentTurnEvidence`, deterministlik tööriistaotsing ja `GroundedResponseAssembler` | `AgentOrchestratorTest`, `GroundedResponseAssemblerTest`; API-04 |
 | Mitme allika ja allikaküsimuse tugi | valitud lõigud säilitatakse eraldi `Source` kirjetena | UC-05, UC-07 ja UC-13 |
 | Prompt injection ja sisemiste juhiste avaldamise kaitse | fail-fast mustrid, fikseeritud süsteemiprompt, suletud mudeliotsus, rakenduse väljundivalideerimine | SEC-01–SEC-06 ja SEC-08; path traversal (SEC-06) on teadlikult fail-fast ning semantilised rolli- ja promptiründed läbivad lisaks mudelivoo |
-| Tundlikku infot ei saadeta teadlikult OpenAI-le | parooli, võtme, tokeni, privaatvõtme ja isikukoodi kontrollid enne mudelit; sünteetiline KB | `RequestSecurityServiceTest`; UC-11 |
+| Tundlikku infot ei saadeta teadlikult OpenAI-le | parooli, võtme, tokeni, privaatvõtme ja isikukoodi kontrollid enne mudelit; sünteetiline KB | `RequestSecurityServiceTest`, `AgentOrchestratorTest`; UC-11 |
 | Täisküsimust ei logita | turvalogi sisaldab ainult kategooriat ja pikkust | logi püüdmise unit-test |
 | Valikuline korduvkasutatav sessioon | piiratud `SessionStore`; tõendid otsitakse järelküsimusel uuesti | `SessionStoreTest`, `AgentOrchestratorTest`, UC-06 ja UC-13 |
 | Unit-testid on võtmeta ja mockivad välised sõltuvused | `src/test`, tühi mudelikonfiguratsioon ja gateway test-double'id | `./gradlew test` |

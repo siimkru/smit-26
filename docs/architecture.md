@@ -24,7 +24,7 @@ Paketid eraldavad API, agendi orkestreerimise, sisenditurbe, teadmusbaasi ja ava
 
 ## Põhiotsused
 
-Teadmusbaas on väike ja staatiline, seega kasutab `KnowledgeBaseRepository` normaliseeritud märksõna- ja aliaseotsingut. Embeddings, vektorandmebaas ja väline otsing ei annaks ülesande kohustuslikele kasutusjuhtudele vajalikku lisaväärtust.
+Teadmusbaas on väike ja staatiline, seega kasutab `KnowledgeBaseRepository` normaliseeritud märksõna- ja aliaseotsingut. `AgentQuestionSupport` hoiab teemaloendi kavatsuse ning sessiooni kontekstipäringu reeglid orkestreerija ja väljundivalideerimise jaoks ühes kohas. Embeddings, vektorandmebaas ja väline otsing ei annaks ülesande kohustuslikele kasutusjuhtudele vajalikku lisaväärtust.
 
 Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratud 2 000 tähemärgiga. Repository ei aktsepteeri küsimust tõendina ainult teema kattumise põhjal: kõik sisulised terminid peavad olema seotud leitud lõikudega või curated aliastega. Seetõttu lükatakse tagasi ka teadaoleva teema kohta esitatud, kuid dokumendis toetamata detailiküsimused.
 
