@@ -144,16 +144,18 @@ Testitulemuste arv sõltub testide ja parameetrite hetkeversioonist; reprodutsee
 
 ## GitHub Actions ja testiraportid
 
-Workflow [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml) käivitab push'i, pull request'i ja käsitsi käivitamise korral alati unit-testid ja staatilised kontrollid. Päris OpenAI integratsioonitestid on eraldi [Live OpenAI integration tests](https://github.com/siimkru/smit-26/actions/workflows/live-integration.yml) workflow's, mida saab käivitada ainult käsitsi ning mis kasutab `openai-integration` Environment'i.
+CI koosneb kuuest eraldi workflow'st. [Tests](https://github.com/siimkru/smit-26/actions/workflows/tests.yml) käivitub push'i, pull request'i ja käsitsi käivitamise korral ning teeb Gitleaksi, pull request'i korral kõrge raskusastme piiriga dependency review kontrolli ja `./gradlew check` käsu. Unit-testide HTML-raport avaldatakse artefaktina `unit-test-html-report`.
 
-Staatiliste CI-tööriistade täpne jaotus on dokumenteeritud failis [docs/ci-static-analysis.md](docs/ci-static-analysis.md). CodeQL, actionlint, ShellCheck, zizmor, Semgrep CE, Gradle dependency submission ja OpenSSF Scorecard katavad vastavalt semantilise turvaanalüüsi, workflowde korrektse süntaksi, shelli, GitHub Actionsi turvahügieeni, mustripõhise SAST-i, sõltuvusgraafi ning tarneahela posture'i. OWASP Dependency-Checki ja SonarQube'i ei lisatud, sest need dubleeriksid olemasolevaid kontrolle.
+Teised workflow'd on [Live OpenAI integration tests](https://github.com/siimkru/smit-26/actions/workflows/live-integration.yml), [CodeQL](https://github.com/siimkru/smit-26/actions/workflows/codeql.yml), [Workflow analysis](https://github.com/siimkru/smit-26/actions/workflows/workflow-analysis.yml), [Gradle dependency submission](https://github.com/siimkru/smit-26/actions/workflows/dependency-submission.yml) ja [OpenSSF Scorecard](https://github.com/siimkru/smit-26/actions/workflows/scorecards.yml). Täpne jaotus, õigused ja piirangud on dokumenteeritud failis [docs/ci-static-analysis.md](docs/ci-static-analysis.md).
 
-Unit-testid ja staatilised kontrollid ei saa OpenAI-võtit. Live-workflow eeldab GitHubis `OPENAI_API_KEY` ja `OPENAI_MODEL` väärtusi Environment'i secret'ide või muutujatena ning selle raport laaditakse üles ka testi ebaõnnestumise korral.
+Unit-testid ja staatilised kontrollid ei saa OpenAI-võtit. Live-workflow käivitub ainult käsitsi, kasutab `openai-integration` Environment'i, käivitab `./gradlew integrationTest` ja avaldab raporti artefaktina `integration-test-html-report` ka testi ebaõnnestumise korral. CodeQL käivitub push'i, pull request'i, käsitsi ja kord nädalas; workflow-analysis käivitub push'i, pull request'i ja käsitsi; dependency submission push'i ja käsitsi; Scorecard push'i, käsitsi ja kord nädalas.
 
+Esitatud testitulemuste workflow-jooksud ja nende raportid:
 
-Hindamiseks vajalik päris integratsioonijooks tuleb teha võtmega lokaalselt või seadistada `openai-integration` Environment'i saladused ja käivitada live-workflow käsitsi. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
+- [Tests run #15](https://github.com/siimkru/smit-26/actions/runs/34544428244) — unit-testid ja staatilised kontrollid; artefakt `unit-test-html-report`.
+- [Live OpenAI integration tests #1](https://github.com/siimkru/smit-26/actions/runs/34546438830) — päris OpenAI integratsioonitestid; artefakt `integration-test-html-report`.
 
-Dokumentatsioon ei fikseeri ajaloolise workflow-jooksu artefakti ega testiarve; GitHub Actionsi värskeim jooks ja selle artefaktid on workflow vaates nähtavad.
+Hindamiseks vajalik päris integratsioonijooks tuleb teha võtmega lokaalselt või seadistada `openai-integration` Environment'i saladused ja käivitada live-workflow käsitsi. Workflow lehtedel on nähtavad jooksude täpsed tulemused ja allalaaditavad raportid. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
 
 ## Teadaolevad piirangud
 

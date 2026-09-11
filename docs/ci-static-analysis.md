@@ -12,7 +12,7 @@ dubleeri neid analüsaatoreid.
 |---|---|---|---|
 | CodeQL | `codeql.yml` | Semantiline Java turvaanalüüs, sh andmevoo ja taustal olevate haavatavuste leidmine | Checkstyle'i, PMD-d ega SpotBugsi |
 | actionlint | `workflow-analysis.yml` | GitHub Actions YAML-i, avaldiste, kontekstide ja action-input'ide valideerimine | Java analüüsi |
-| ShellCheck | actionlinti embedded shell kontroll | Workflow `run` skriptide shell-spetsiifiliste vigade leidmine | Rakenduse Java turvakontrolle |
+| ShellCheck | `workflow-analysis.yml` actionlinti kaudu | Workflow `run` skriptide shell-spetsiifiliste vigade leidmine | Rakenduse Java turvakontrolle |
 | zizmor | `workflow-analysis.yml` | GitHub Actionsi turvamustrite, liigsete õiguste, skripti-injektsiooni ja mutable action-ref'ide audit | Workflow YAML-i süntaksikontrolli |
 | Semgrep CE | `workflow-analysis.yml` | Keeleteadlikud Java ja konfiguratsiooni turvareeglid; sobib hiljem projekti enda keelureeglitele | Olemasolevaid Java analüsaatoreid tervikuna |
 | Gradle dependency submission | `dependency-submission.yml` | Kogu Gradle'i sõltuvusgraafi GitHubisse saatmine, et Dependabot saaks pidevat sõltuvusvaadet kasutada | Pull request'i dependency-review kontrolli |
@@ -25,15 +25,19 @@ olemasolevaid Checkstyle-, PMD- ja SpotBugs-kontrolle.
 
 ## Käivitumine
 
-- `tests.yml` käivitab iga muudatuse puhul unit-testid, Checkstyle'i, PMD, SpotBugsi,
-  FindSecBugsi, JaCoCo ja Gitleaksi.
-- `codeql.yml` käivitub push'i, pull request'i ja kord nädalas; tulemused lähevad
-  GitHub Code Scanningusse.
-- `workflow-analysis.yml` kontrollib workflow-faile ning Java/configuration
-  turvamustreid iga push'i ja pull request'i puhul.
-- `dependency-submission.yml` saadab push'i järel Gradle'i dependency-graafi
-  GitHubisse.
-- `scorecards.yml` käivitub push'i ja kord nädalas ning avaldab SARIF-raporti.
+- `tests.yml` käivitub push'i, pull request'i ja käsitsi. See käivitab unit-testid,
+  Checkstyle'i, PMD-d, SpotBugsi, FindSecBugsi, JaCoCo ja Gitleaksi. Dependency
+  review käivitub ainult pull request'i korral ja peatab kõrge raskusastmega
+  haavatavused.
+- `codeql.yml` käivitub push'i, pull request'i, käsitsi ja kord nädalas; tulemused
+  lähevad GitHub Code Scanningusse.
+- `workflow-analysis.yml` käivitub push'i, pull request'i ja käsitsi ning kontrollib
+  workflow-faile actionlinti/ShellCheckiga, Actionsi turvahügieeni zizmoriga ning
+  Java/configuration turvamustreid Semgrep CE-ga.
+- `dependency-submission.yml` käivitub push'i ja käsitsi ning saadab Gradle'i
+  dependency-graafi GitHubisse.
+- `scorecards.yml` käivitub push'i, käsitsi ja kord nädalas ning avaldab SARIF-raporti
+  nii artefaktina kui ka GitHub Code Scanningusse.
 - Päris OpenAI integratsioonitestid on failis `live-integration.yml` ja ainult
   `workflow_dispatch` sündmusel. Workflow kasutab `openai-integration` GitHub
   Environment'i, et API-võti ei oleks tavapärase pull request'i koodi käes.
