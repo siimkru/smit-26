@@ -152,8 +152,8 @@ Unit-testid ja staatilised kontrollid ei saa OpenAI-võtit. Live-workflow käivi
 
 Esitatud testitulemuste workflow-jooksud ja nende raportid:
 
-- [Tests run #15](https://github.com/siimkru/smit-26/actions/runs/34544428244) — unit-testid ja staatilised kontrollid; artefakt `unit-test-html-report`.
-- [Live OpenAI integration tests #1](https://github.com/siimkru/smit-26/actions/runs/34546438830) — päris OpenAI integratsioonitestid; artefakt `integration-test-html-report`.
+- [Tests run #21](https://github.com/siimkru/smit-26/actions/runs/34548855748) — unit-testid ja staatilised kontrollid; artefakt `unit-test-html-report`.
+- [Live OpenAI integration tests #2](https://github.com/siimkru/smit-26/actions/runs/34548967516) — päris OpenAI integratsioonitestid; artefakt `integration-test-html-report`.
 
 Hindamiseks vajalik päris integratsioonijooks tuleb teha võtmega lokaalselt või seadistada `openai-integration` Environment'i saladused ja käivitada live-workflow käsitsi. Workflow lehtedel on nähtavad jooksude täpsed tulemused ja allalaaditavad raportid. Repo link on [github.com/siimkru/smit-26](https://github.com/siimkru/smit-26).
 
