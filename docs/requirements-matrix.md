@@ -17,7 +17,7 @@
 | Küsimuse detail peab olema tõendatud, mitte ainult teema seotud | `KnowledgeBaseRepository` täieliku toe kontroll, aliaste loend ja `GroundedResponseAssembler` | `KnowledgeBaseRepositoryTest`, `AgentOrchestratorTest`, `GroundedResponseAssemblerTest`; GROUND-01 ja GROUND-02 |
 | `refused:false` nõuab allikaid ja inimloetavaid viiteid | `CurrentTurnEvidence`, deterministlik tööriistaotsing ja `GroundedResponseAssembler` | `AgentOrchestratorTest`, `GroundedResponseAssemblerTest`; API-04 |
 | Mitme allika ja allikaküsimuse tugi | valitud lõigud säilitatakse eraldi `Source` kirjetena | UC-05, UC-07 ja UC-13 |
-| Prompt injection ja sisemiste juhiste avaldamise kaitse | fail-fast mustrid, fikseeritud süsteemiprompt, suletud mudeliotsus, rakenduse väljundivalideerimine | SEC-01–SEC-06 ja SEC-08 nii REST-i kui mudelini jõudvate variantidega |
+| Prompt injection ja sisemiste juhiste avaldamise kaitse | fail-fast mustrid, fikseeritud süsteemiprompt, suletud mudeliotsus, rakenduse väljundivalideerimine | SEC-01–SEC-06 ja SEC-08; path traversal (SEC-06) on teadlikult fail-fast ning semantilised rolli- ja promptiründed läbivad lisaks mudelivoo |
 | Tundlikku infot ei saadeta teadlikult OpenAI-le | parooli, võtme, tokeni, privaatvõtme ja isikukoodi kontrollid enne mudelit; sünteetiline KB | `RequestSecurityServiceTest`; UC-11 |
 | Täisküsimust ei logita | turvalogi sisaldab ainult kategooriat ja pikkust | logi püüdmise unit-test |
 | Valikuline korduvkasutatav sessioon | piiratud `SessionStore`; tõendid otsitakse järelküsimusel uuesti | `SessionStoreTest`, `AgentOrchestratorTest`, UC-06 ja UC-13 |
@@ -39,6 +39,6 @@
 | UC-01–UC-08 | sama integratsiooniklass; toetatud, allikaga ja eestikeelne käitumine ning sessiooni järelküsimus |
 | UC-09–UC-13 | sama integratsiooniklass; keeldumised, väljamõeldud allika puudumine ja allika järelküsimus |
 | GROUND-01, GROUND-02 | `AgentRestIntegrationTest`; teadaoleva teemaga seotud, kuid lõigus toetamata detail lükatakse tagasi |
-| SEC-01–SEC-06, SEC-08 | sama integratsiooniklass; ülesande originaalsisend peatub fail-fast ning semantiline variant läbib päris mudelivoo sama ohutu tulemusega |
+| SEC-01–SEC-06, SEC-08 | sama integratsiooniklass; ülesande originaalsisendid peatavad teadaolevad ründed fail-fast, samal ajal kui mudelini jõudvad semantilised variandid kontrollivad ohutut tulemust |
 
 Rate limiting on ülesandes soovituslik ja seda ei ole lisatud. Genereeritud raportid jäävad lokaalsesse `build/` kataloogi või GitHub Actionsi artefaktidesse ega kuulu lähtekoodi. CI staatiliste lisakontrollide vastutus on dokumenteeritud failis `docs/ci-static-analysis.md`.
