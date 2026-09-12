@@ -95,6 +95,21 @@ class AgentOrchestratorTest {
     }
 
     @Test
+    void neverRecoversUnsafeModelRefusalIntoSupportedAnswer() {
+        AgentModelGateway gateway = (question, history) -> {
+            tools.searchKnowledgeBase(question);
+            return new AgentDecision("REFUSE", List.of(), "UNSAFE");
+        };
+
+        var response = service(gateway).ask(new AskRequest(
+                "Kuidas taotleda ligipääsu GitLabile?", null));
+
+        assertThat(response.refused()).isTrue();
+        assertThat(response.sources()).isEmpty();
+        assertThat(response.refusalReason()).isEqualTo("Päring ei ole agendi turvareeglite järgi lubatud.");
+    }
+
+    @Test
     void sec09RefusesNaturalEstonianPasswordBeforeCallingModel() {
         AtomicInteger calls = new AtomicInteger();
         AgentModelGateway gateway = (ignoredQuestion, history) -> {

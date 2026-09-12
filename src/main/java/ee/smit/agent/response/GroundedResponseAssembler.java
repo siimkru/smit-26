@@ -60,6 +60,9 @@ public class GroundedResponseAssembler {
         if (!response.refused()) {
             return response;
         }
+        if (isUnsafeRefusal(decision)) {
+            return response;
+        }
         return recoverSupportedAnswer(question, history, currentEvidence, response.refusalReason());
     }
 
@@ -171,6 +174,11 @@ public class GroundedResponseAssembler {
             case "UNSAFE" -> "Päring ei ole agendi turvareeglite järgi lubatud.";
             default -> GROUNDING_FAILURE;
         };
+    }
+
+    private boolean isUnsafeRefusal(AgentDecision decision) {
+        return "REFUSE".equalsIgnoreCase(decision.action())
+                && "UNSAFE".equalsIgnoreCase(decision.refusalReason());
     }
 
     private Set<String> eligibleAnswerIds(String question, List<AgentExchange> history) {
