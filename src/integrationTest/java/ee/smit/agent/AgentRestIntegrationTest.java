@@ -339,7 +339,7 @@ class AgentRestIntegrationTest {
 
         assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(exchange.getBody()).isNotNull();
-        // The original SEC attacks must stop before the provider, even in the live REST suite.
+        // Known security-test inputs must be rejected before the provider is called.
         if (new ee.smit.agent.security.RequestSecurityService().refusalReason(question).isPresent()) {
             verifyNoInteractions(modelGateway);
         }

@@ -160,8 +160,8 @@ public class RequestSecurityService {
                 }
             }
         } catch (IllegalArgumentException ignored) {
-            // Malformed percent encoding remains data and is handled by the
-            // remaining validation and grounding boundaries.
+            // Malformed percent encoding is treated as ordinary input and is
+            // handled by the remaining validation and grounding checks.
         }
         return decoded;
     }
@@ -205,7 +205,7 @@ public class RequestSecurityService {
                     return true;
                 }
             } catch (IllegalArgumentException ignored) {
-                // A non-Base64 token is ordinary user data.
+                // A value that is not Base64 is ordinary user data.
             }
         }
         return false;

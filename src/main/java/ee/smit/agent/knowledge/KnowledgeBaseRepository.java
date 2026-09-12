@@ -40,8 +40,8 @@ public class KnowledgeBaseRepository {
                     "code review", "koodireview", "merge", "pull request", "ulevaataja", "kontrollida", "uhendamine", "kood"),
             "access-management.md", List.of("oigused", "kasutajakonto", "roll")
     );
-    /* Question wording is deliberately curated for this five-topic KB. Unknown
-       substantive terms must not turn a merely related topic into evidence. */
+    /* These aliases cover the wording used by the five-topic knowledge base.
+       Unknown content words must not turn a related topic into evidence. */
     private static final Map<String, List<String>> SUPPORTED_ALIASES = Map.of(
             "gitlab-access.md", List.of(
                     "access", "taotleda", "taotlus", "juurdepaas", "juurdepaasu", "saamine", "juhis", "juhised",
@@ -190,8 +190,8 @@ public class KnowledgeBaseRepository {
         return documentToken.equals(queryToken) || stem(documentToken).equals(stem(queryToken));
     }
 
-    /* Small, predictable normalization for common Estonian case endings; this
-       is intentionally not a general language-processing dependency. */
+    /* Normalize common Estonian case endings without adding a language
+       processing dependency. */
     private String stem(String token) {
         return token.replaceFirst("(miseks|mise|idele|idega|esse|asse|usse|isse|uks|ust|ast|est|ist|ile|iga|id|it|at|st|lt|le|ga|i)$", "");
     }

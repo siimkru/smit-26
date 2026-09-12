@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-/** The complete set of functions that may be handed to an AI model. */
+/** Names of the tools available to the model. */
 @Component
 public class ToolAllowlist {
 
@@ -20,7 +20,7 @@ public class ToolAllowlist {
 
     public void requireAllowed(String toolName) {
         if (!isAllowed(toolName)) {
-            throw new IllegalArgumentException("Lubamatu teadmusriba tööriist: " + toolName);
+            throw new IllegalArgumentException("Lubamatu teadmusbaasi tööriist: " + toolName);
         }
     }
 }

@@ -13,11 +13,11 @@
 | Spring AI tool calling | `SpringAiOpenAiGateway` annab `ToolCallbackProvider`-i `ChatClient`-ile | päris integratsioonitestid |
 | Ainult lubatud read-only KB-tööriistad | `ToolAllowlist`, `KnowledgeBaseToolConfiguration`, `KnowledgeBaseTools` | `KnowledgeBaseToolsTest`; SEC-02 ja SEC-06 |
 | Süsteemi- ja kasutajaroll on eraldi | `agent-system.txt`, `AgentPromptFactory` | `AgentPromptFactoryTest`; SEC-01, SEC-03 ja SEC-05 |
-| Agent vastab eesti keeles ja ainult KB põhjal | eestikeelne prompt ja KB; `GroundedResponseAssembler` koostab avaliku teksti kanoonilistest lõikudest | positiivsed UC-testid, eriti UC-08; UC-10 ja UC-12 |
+| Agent vastab eesti keeles ja ainult KB põhjal | eestikeelne prompt ja KB; `GroundedResponseAssembler` koostab avaliku teksti teadmusbaasi lõikudest | positiivsed UC-testid, eriti UC-08; UC-10 ja UC-12 |
 | Küsimuse detail peab olema tõendatud, mitte ainult teema seotud | `KnowledgeBaseRepository` täieliku toe kontroll, aliaste loend ja `GroundedResponseAssembler` | `KnowledgeBaseRepositoryTest`, `AgentOrchestratorTest`, `GroundedResponseAssemblerTest`; GROUND-01 ja GROUND-02 |
 | `refused:false` nõuab allikaid ja inimloetavaid viiteid | `CurrentTurnEvidence`, deterministlik tööriistaotsing ja `GroundedResponseAssembler` | `AgentOrchestratorTest`, `GroundedResponseAssemblerTest`; API-04 |
 | Mitme allika ja allikaküsimuse tugi | valitud lõigud säilitatakse eraldi `Source` kirjetena | UC-05, UC-07 ja UC-13 |
-| Prompt injection ja sisemiste juhiste avaldamise kaitse | fail-fast mustrid, fikseeritud süsteemiprompt, suletud mudeliotsus, rakenduse väljundivalideerimine | SEC-01–SEC-06 ja SEC-08; path traversal (SEC-06) on teadlikult fail-fast ning semantilised rolli- ja promptiründed läbivad lisaks mudelivoo |
+| Prompt injection ja sisemiste juhiste avaldamise kaitse | enne mudelikõnet rakendatavad mustrid, fikseeritud süsteemiprompt, lubatud otsusetüübid, rakenduse väljundivalideerimine | SEC-01–SEC-06 ja SEC-08; path traversal (SEC-06) peatatakse enne mudelikõnet ning ülejäänud ründevariantide puhul kontrollitakse ka mudeli väljundit |
 | Tundlikku infot ei saadeta teadlikult OpenAI-le | parooli, võtme, tokeni, privaatvõtme ja isikukoodi kontrollid enne mudelit; sünteetiline KB | `RequestSecurityServiceTest`, `AgentOrchestratorTest`; UC-11 |
 | Täisküsimust ei logita | turvalogi sisaldab ainult kategooriat ja pikkust | logi püüdmise unit-test |
 | Valikuline korduvkasutatav sessioon | piiratud `SessionStore`; tõendid otsitakse järelküsimusel uuesti | `SessionStoreTest`, `AgentOrchestratorTest`, UC-06, UC-13 ja UC-14 |
@@ -38,7 +38,7 @@
 | API-04 | `AgentRestIntegrationTest`; avaliku JSON struktuur päris OpenAI voos |
 | UC-01–UC-08 | sama integratsiooniklass; toetatud, allikaga ja eestikeelne käitumine ning sessiooni järelküsimus |
 | UC-09–UC-13 | sama integratsiooniklass; keeldumised, väljamõeldud allika puudumine ja allika järelküsimus |
-| UC-14 | `AgentRestIntegrationTest`; pikem GitLabi vestlus püsib maandatud ka pärast sessiooni konteksti ülelibisemist |
+| UC-14 | `AgentRestIntegrationTest`; pikem GitLabi vestlus jääb allikapõhiseks ka pärast vanema sessioonikonteksti eemaldamist |
 | GROUND-01, GROUND-02 | `AgentRestIntegrationTest`; teadaoleva teemaga seotud, kuid lõigus toetamata detail lükatakse tagasi |
 | SEC-01–SEC-06, SEC-08 | sama integratsiooniklass; ülesande originaalsisendid peatavad teadaolevad ründed fail-fast, samal ajal kui mudelini jõudvad semantilised variandid kontrollivad ohutut tulemust |
 

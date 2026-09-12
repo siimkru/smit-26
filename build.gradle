@@ -161,7 +161,7 @@ tasks.register('integrationTest', Test) {
                             + 'it must run against a real OpenAI model.')
         }
     }
-    // A previous skipped/keyed run must not mask a new live-provider run.
+    // Always run live-provider tests; cached results must not be reused.
     outputs.upToDateWhen { false }
     reports.html.required = true
     reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/integrationTest')

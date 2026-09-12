@@ -4,7 +4,7 @@
 
 ## Süsteemi kuju
 
-Rakendus on üks sünkroonne Java 21 ja Spring Booti protsess. REST-kontroller annab küsimuse turvakontrollile, orkestreerija teeb sama päringu jaoks esmalt deterministliku otsingu lubatud teadmusbaasi tööriistaga ning loob eraldi süsteemi- ja kasutajasõnumid. Spring AI kutsub OpenAI mudelit ja annab mudelile ainult kaks teadmusbaasi tööriista. Viis Markdown-dokumenti laaditakse fikseeritud classpath-manifestist käivitamisel mällu.
+Rakendus on üks sünkroonne Java 21-l ja Spring Bootil põhinev protsess. REST-kontroller suunab küsimuse turvakontrolli. Orkestreerija teeb enne mudelikõnet lubatud teadmusbaasi tööriistaga otsingu ning loob eraldi süsteemi- ja kasutajasõnumid. Spring AI kutsub OpenAI mudelit ja annab sellele ainult kaks teadmusbaasi tööriista. Viis Markdown-dokumenti laaditakse käivitamisel fikseeritud classpath-manifestist mällu.
 
 ```mermaid
 flowchart LR
@@ -24,15 +24,15 @@ Paketid eraldavad API, agendi orkestreerimise, sisenditurbe, teadmusbaasi ja ava
 
 ## Põhiotsused
 
-Teadmusbaas on väike ja staatiline, seega kasutab `KnowledgeBaseRepository` normaliseeritud märksõna- ja aliaseotsingut. `AgentQuestionSupport` hoiab teemaloendi kavatsuse ning sessiooni kontekstipäringu reeglid orkestreerija ja väljundivalideerimise jaoks ühes kohas. Embeddings, vektorandmebaas ja väline otsing ei annaks ülesande kohustuslikele kasutusjuhtudele vajalikku lisaväärtust.
+Teadmusbaas on väike ja staatiline, seega kasutab `KnowledgeBaseRepository` normaliseeritud märksõna- ja aliaseotsingut. `AgentQuestionSupport` koondab teemaloendi tuvastamise ja sessiooni järelküsimuste reeglid. Embeddings, vektorandmebaas ja väline otsing ei ole selle ülesande jaoks vajalikud.
 
-Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratud 2 000 tähemärgiga. Repository ei aktsepteeri küsimust tõendina ainult teema kattumise põhjal: kõik sisulised terminid peavad olema seotud leitud lõikudega või curated aliastega. Seetõttu lükatakse tagasi ka teadaoleva teema kohta esitatud, kuid dokumendis toetamata detailiküsimused.
+Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratud 2 000 tähemärgiga. Repository ei pea küsimust toetatuks ainult teema kattumise põhjal: kõik sisulised terminid peavad olema seotud leitud lõikude või valitud aliasega. Seetõttu lükatakse tagasi ka teadaoleva teema kohta esitatud, kuid dokumendis toetamata detailiküsimused.
 
 `KnowledgeBaseTools` eksponeerib Spring AI-le ainult `listTopics` ja `searchKnowledgeBase`. Otsinguargument on andmestring, mitte failitee. Repository avab ainult manifestis nimetatud classpath-ressursid; tööriistadel puuduvad võrgu-, kirjutamis- ja käsuvõimed.
 
-Mudel ei koosta avalikku vastust. Ta tagastab `AgentDecision` objekti, mille action on `ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`, ning valib tööriistatulemustes olnud lõikude ID-d. `CurrentTurnEvidence` kogub ainult sama päringu jooksul tagastatud kanoonilised lõigud. Orkestreerija esmane tööriistaotsing tagab, et mudeli juhuslik tööriistakutse vahelejätmine või põhjendamatu keeldumine ei muudaks toetatud küsimust veaks. `GroundedResponseAssembler` võib sellise otsuse taastada ainult siis, kui algne küsimus läbib sõltumatu relevantsuskontrolli ja sama päringu tööriistatõend on kanooniline. Toetamata detaili puhul on otsing tühi ja keeldumist ei taastata. Seetõttu ei saa mudeli väljamõeldud allikas ega faktiline proosa avalikku API vastusesse jõuda.
+Mudel ei koosta avalikku vastust. Ta tagastab `AgentDecision` objekti, mille `action` on `ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`, ning valib tööriistatulemustes olnud lõikude ID-d. `CurrentTurnEvidence` kogub ainult sama päringu jooksul tagastatud lõigud. Orkestreerija teeb otsingu enne mudelikõnet, et toetatud küsimusele oleks tõend olemas ka siis, kui mudel jätab tööriista uuesti kutsumata või keeldub põhjendamatult. `GroundedResponseAssembler` kasutab mudeli otsust ainult siis, kui küsimus on otsingutulemuste põhjal toetatud. Toetamata detaili puhul jääb otsing tühjaks ja vastust ei koostata. Nii ei jõua mudeli väljamõeldud allikas ega faktiline tekst avalikku API vastusesse.
 
-`CurrentTurnEvidence` kasutab `ThreadLocal`-it ning tugineb rakenduse praegusele sünkroonsele eeldusele, et orkestreerimine, mudelikõne ja tööriistakutsed täidetakse sama päringulõime kontekstis. Asünkroonse tööriistatäitmise korral ei ole see eeldus piisav: siis tuleb tõendikontekst muuta eksplitsiitselt request-scoped'iks ning kontrollida paralleelpäringute isolatsiooni eraldi testidega.
+`CurrentTurnEvidence` kasutab `ThreadLocal`-it ning eeldab, et orkestreerimine, mudelikõne ja tööriistakutsed täidetakse samal lõimel. Asünkroonse tööriistatäitmise korral tuleb tõendikontekst päringuga eraldi kaasa anda ja kontrollida paralleelpäringute eraldatust.
 
 Kõik `refused:false` vastused sisaldavad vähemalt ühte allikat ning iga allikas on vastuses kujul `[allikas: fail.md]`. Toetuseta, skoopiväline, ohtlik või vigaselt maandatud otsus muutub rakenduse koostatud eestikeelseks keeldumiseks.
 
@@ -47,7 +47,7 @@ Valikuline `sessionId` on läbipaistmatu kontekstivõti, mitte autentimine. `Ses
 ## API ja vead
 
 - `POST /api/v1/agent/ask` võtab kohustusliku `question`-i ja valikulise `sessionId`-i.
-- `GET /api/v1/health` tagastab lokaalse liveness-oleku ilma OpenAI kutseta.
+- `GET /api/v1/health` tagastab rakenduse oleku ilma OpenAI kutseta.
 - Vigane sisend saab HTTP 400; turvaline keeldumine saab HTTP 200 koos `refused:true`; mudeli konfiguratsiooni või teenuse puudumine saab sanitiseeritud HTTP 503.
 - Vastuse väljad on `answer`, `sources`, `confidence`, `refused` ja `refusalReason`; allikas sisaldab `file`, `title` ja `excerpt`.
 
@@ -55,6 +55,6 @@ Valikuline `sessionId` on läbipaistmatu kontekstivõti, mitte autentimine. `Ses
 
 `test` task katab rakenduse enda loogika ilma võtme või võrguta. `integrationTest` käivitab päris REST → Spring AI → OpenAI voo ja nõuab enne testide alustamist mittetühje `OPENAI_API_KEY` ning `OPENAI_MODEL` väärtusi; puuduv konfiguratsioon põhjustab vea, mitte testide vaikse vahelejätmise. Integratsioonitestid katavad lisaks kasutusjuhtudele `GROUND-01` ja `GROUND-02`, mis kontrollivad toetamata detailide tagasilükkamist. Unit-testide HTML raport avaldatakse iga kontrolljooksu korral. Päris OpenAI testid on eraldi käsitsi käivitatavas `live-integration.yml` workflow's ja kasutavad kaitstud `openai-integration` Environment'i, et tavapärase pull request'i kood ei saaks API-võtit.
 
-Gradle'is on lisaks seadistatud Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo; `./gradlew check` käivitab need kontrollid ning nõuab vähemalt 70% ridade katvust. CI lisakontrollid on dokumenteeritud failis `docs/ci-static-analysis.md`: CodeQL, actionlint/ShellCheck, zizmor, Semgrep CE, Gradle dependency submission ja OpenSSF Scorecard. Need täidavad vastavalt semantilise turvaanalüüsi, workflowde korrektse süntaksi, Actionsi turvahügieeni, mustripõhise SAST-i, sõltuvusgraafi ja tarneahela posture'i rolli ega dubleeri Gradle'i Java-analüsaatoreid.
+Gradle'is on lisaks seadistatud Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo; `./gradlew check` käivitab need kontrollid ning nõuab vähemalt 70% ridade katvust. CI lisakontrollid on dokumenteeritud failis `docs/ci-static-analysis.md`: CodeQL, actionlint/ShellCheck, zizmor, Semgrep CE, Gradle dependency submission ja OpenSSF Scorecard. Need kontrollivad vastavalt Java turvalisust, workflowde süntaksit ja turvaseadeid, mustripõhiseid turvariske, sõltuvusgraafi ning CI tarneahela turvalisust.
 
-Rate limiting, mudelikõnede concurrency-piirid ja operatiivmõõdikud jäävad välja, sest ülesanne eelistab väikest lahendust ega nõua tootmiskõlblikku infrastruktuuri. OpenAI HTTP-päringul on seadistatav 30-sekundiline vaike-timeout. Gradle'i lokaalsed Checkstyle-, PMD-, SpotBugs/FindSecBugs- ja JaCoCo-kontrollid on siiski olemas. Püsiv andmebaas, autentimisplatvorm, väline otsing, streaming, mitme instantsi koordineerimine ja deployment-infrastruktuur jäävad samuti välja. Samal põhjusel vastab üks Markdown-fail ühele lõigule; suurema korpuse korral vajaks otsing heading'u- või lõigupõhist tükeldamist.
+Rate limiting, mudelikõnede concurrency-piirid ja operatiivmõõdikud jäävad välja, sest ülesanne eelistab väikest lahendust ega nõua tootmiskõlblikku infrastruktuuri. OpenAI HTTP-päringul on seadistatav 30-sekundiline vaike-timeout. Gradle'i lokaalsed Checkstyle-, PMD-, SpotBugs/FindSecBugs- ja JaCoCo-kontrollid on siiski olemas. Püsiv andmebaas, autentimisplatvorm, väline otsing, streaming, mitme instantsi koordineerimine ja deploy-taristu jäävad samuti välja. Samal põhjusel vastab üks Markdown-fail ühele lõigule; suurema korpuse korral vajaks otsing heading'u- või lõigupõhist tükeldamist.

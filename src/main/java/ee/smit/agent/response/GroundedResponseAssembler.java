@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.text.Normalizer;
 
-/** Final trust boundary: only canonical current-turn KB text reaches factual API answers. */
+/** Builds public answers only from passages returned for the current request. */
 @Component
 public class GroundedResponseAssembler {
 

@@ -1,6 +1,6 @@
 # SMIT IT-teenuste infoagent
 
-See projekt on Spring Booti ja Spring AI põhine piiratud sise-IT infoagent. Agent vastab eesti keeles ainult repos olevast teadmusbaasist, kasutab OpenAI mudelit allikalõikude valimiseks ning tagastab iga toetatud vastusega kontrollitud allikad ja inimloetavad viited. Avaliku faktilise vastuse koostab Java kood kanoonilistest teadmusbaasi lõikudest; mudeli loodud faktilist proosat API-sse ei edastata.
+See projekt on Spring Booti ja Spring AI põhine piiratud sise-IT infoagent. Agent vastab eesti keeles ainult repos oleva teadmusbaasi põhjal, kasutab OpenAI mudelit sobivate lõikude valimiseks ning tagastab iga toetatud vastusega kontrollitud allikad ja inimloetavad viited. Avaliku faktilise vastuse koostab Java kood teadmusbaasi lõikudest; mudeli koostatud faktilist teksti API-sse ei edastata.
 
 Projekt kasutab Java 21, Spring Boot 4.1.1, Spring AI 2.0.1, OpenAI mudelit ja Gradle 9.1.0 Wrapperit. Lühike tarnitav arhitektuuri- ja turvakokkuvõte on failis [docs/submission-summary.md](docs/submission-summary.md).
 
@@ -8,7 +8,7 @@ Projekt kasutab Java 21, Spring Boot 4.1.1, Spring AI 2.0.1, OpenAI mudelit ja G
 
 Üks sünkroonne Spring Booti rakendus teenindab REST API-t. Viis sünteetilist Markdown-faili laaditakse käivitamisel fikseeritud classpath-manifestist muutumatusse mällu. Spring AI-le registreeritakse täpselt kaks read-only tööriista: `listTopics` ja `searchKnowledgeBase`. Üldist failisüsteemi-, võrgu-, andmebaasi- ega käsutööriista ei ole.
 
-OpenAI mudel tagastab suletud sisemise otsuse (`ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`) ja valitud lõikude ID-d. Rakendus lubab ainult sama päringu tööriistakutsetega saadud kanoonilisi ID-sid, kontrollib nende seost küsimusega ning koostab `answer`-i, `sources`-i, viited ja usaldustaseme ise. Staatiline märksõna- ja aliaseotsing eristab vestluslikku sõnastust küsitud faktidest ning sobib viie väikese dokumendi jaoks; vektorandmebaas ja embeddings ei ole selle ülesande jaoks vajalikud.
+OpenAI mudel tagastab ühe lubatud otsuse (`ANSWER`, `LIST_TOPICS`, `CLARIFY` või `REFUSE`) ja valitud lõikude ID-d. Rakendus lubab ainult sama päringu tööriistakutsetega saadud ID-sid, kontrollib nende seost küsimusega ning koostab `answer`-i, `sources`-i, viited ja usaldustaseme ise. Staatiline märksõna- ja aliaseotsing sobib viie väikese dokumendi jaoks; vektorandmebaas ja embeddings ei ole selle ülesande jaoks vajalikud.
 
 Otsinguküsimus ja järelküsimuse jaoks moodustatud kontekstipäring on piiratud sama 2 000 tähemärgiga nagu API küsimus.
 
@@ -29,14 +29,14 @@ Fail `.env.example` sisaldab ainult ohutuid näidisväärtusi. Kopeeri see lokaa
 
 ```sh
 cp .env.example .env
-# täida .env lokaalselt; ära commiti seda
+# täida .env lokaalselt; ära lisa seda versioonihaldusse
 set -a
 . ./.env
 set +a
 ./gradlew bootRun
 ```
 
-Ilma võtme või mudelita rakendus käivitub ja tervisekontroll töötab, kuid agendipäring tagastab sanitiseeritud HTTP 503 vastuse.
+Ilma võtme või mudelita rakendus käivitub ja tervisekontroll töötab, kuid agendipäring tagastab sisemisi üksikasju mitteavaldava HTTP 503 vastuse.
 
 ## API kasutamine
 
@@ -52,7 +52,7 @@ curl http://localhost:8080/api/v1/health
 
 Agendilt küsimiseks kasuta `POST /api/v1/agent/ask`. `question` on kohustuslik ja kuni 2000 tähemärki. `sessionId` on valikuline ning võib sisaldada 1–128 ASCII tähte, numbrit, alakriipsu või sidekriipsu.
 
-Järelküsimuste jaoks genereeri kliendis ennustamatu sessiooni ID ja kasuta sama väärtust järgnevates küsimustes. Ära kasuta kasutajanime, e-posti aadressi ega muud äraarvatavat tunnust sessiooni ID-na.
+Järelküsimuste jaoks genereeri kliendis raskesti äraarvatav sessiooni ID ja kasuta sama väärtust järgnevates küsimustes. Ära kasuta kasutajanime, e-posti aadressi ega muud äraarvatavat tunnust sessiooni ID-na.
 
 ```sh
 curl -X POST http://localhost:8080/api/v1/agent/ask \
@@ -94,15 +94,15 @@ Tühi, puuduv või üle 2000 märgi pikkune küsimus ja vigane JSON saavad HTTP 
 
 ## Teadmusbaas ja süsteemiprompt
 
-Teadmusbaasi failid asuvad `src/main/resources/knowledge-base/` kataloogis ja käsitlevad GitLabi ligipääsu, Kubernetesi juurutamist, CI/CD pipeline'i, koodireview'd ning ligipääsude haldust. Iga teema on eraldi Markdown-failis. Rakendus ei ava kasutaja antud failiteid.
+Teadmusbaasi failid asuvad `src/main/resources/knowledge-base/` kataloogis ja käsitlevad GitLabi ligipääsu, Kubernetesi deploy'd, CI/CD pipeline'i, koodireview'd ning juurdepääsuõiguste haldust. Iga teema on eraldi Markdown-failis. Rakendus ei ava kasutaja antud failiteid.
 
-Eestikeelne süsteemiprompt asub `src/main/resources/prompts/agent-system.txt`. Spring AI sõnumiloendis on see `system` rollis; kasutaja küsimus ja sessiooniajalugu jäävad eraldi `user` ja `assistant` rollidesse. Prompt määrab keele, skoopi, tööriistad, keeldumise, allikate ja sisemise JSON-otsuse reeglid. Rakenduse valideerimine jõustab samad põhiinvariandid mudelist sõltumatult.
+Eestikeelne süsteemiprompt asub `src/main/resources/prompts/agent-system.txt`. Spring AI sõnumiloendis on see `system` rollis; kasutaja küsimus ja sessiooniajalugu jäävad eraldi `user` ja `assistant` rollidesse. Prompt määrab keele, ulatuse, tööriistad, keeldumise, allikate ja sisemise JSON-otsuse reeglid. Rakendus kontrollib need põhireeglid üle ka pärast mudelikõnet.
 
 ## Turvalisus
 
-Enne OpenAI kutset kontrollitakse sisendi pikkust ning blokeeritakse teadaolevad prompt injection'i, rolli ümberkirjutamise, sisemiste juhiste või tööriistade avaldamise, path traversal'i, destruktiivsete juhiste ja ilmsete saladuste mustrid. Segatud õiguspärane ja ründav küsimus lükatakse tervikuna tagasi. Turvalogisse jõuavad ainult kategooria ja sisendi pikkus, mitte küsimus ega tuvastatud saladuse väärtus.
+Enne OpenAI kutset kontrollitakse sisendi pikkust ning blokeeritakse teadaolevad prompt injection'i, rolli muutmise, sisemiste juhiste või tööriistade avaldamise, path traversal'i, kustutamiskäskude ja ilmsete saladuste mustrid. Kui küsimus sisaldab nii lubatud kui ka ründavat osa, lükatakse kogu küsimus tagasi. Turvalogisse jõuavad ainult kategooria ja sisendi pikkus, mitte küsimus ega tuvastatud saladuse väärtus.
 
-Tööriistade allowlist on koodis fikseeritud. Mõlemad tööriistad loevad ainult käivitamisel laaditud staatilist teadmusbaasi, ei kirjuta andmeid, ei käivita käske ega tee väliseid päringuid. Mudeli valitud allikas peab esinema praeguse päringu tõendite hulgas, võrduma repos laaditud kanoonilise lõiguga ja toetama küsimuses küsitud sisulisi detaile. Pelk teemakattuvus ei ole piisav: kui näiteks GitLabi kohta küsitud tasu või lisatingimust lõigus ei ole, keeldub rakendus vastamast. `refused:false` vastus lubatakse ainult siis, kui `sources` ei ole tühi ja `answer` sisaldab iga allikafaili inimloetavat viidet.
+Tööriistade allowlist on koodis fikseeritud. Mõlemad tööriistad loevad ainult käivitamisel laaditud staatilist teadmusbaasi, ei kirjuta andmeid, ei käivita käske ega tee väliseid päringuid. Mudeli valitud allikas peab olema praeguse päringu käigus saadud, vastama repos laaditud lõigule ja toetama küsimuse olulisi detaile. Pelk teemakattuvus ei ole piisav: kui näiteks GitLabi kohta küsitud tasu või lisatingimust lõigus ei ole, keeldub rakendus vastamast. `refused:false` vastus lubatakse ainult siis, kui `sources` ei ole tühi ja `answer` sisaldab iga allikafaili inimloetavat viidet.
 
 Küsimuse detailitaseme maandamine tähendab, et seotud teema leidmine üksi ei anna vastamiseks piisavat alust. Näiteks GitLabi dokument ei toeta vastust tasu või polügraafinõude kohta, kui sellist detaili lõigus ei ole.
 
@@ -135,7 +135,7 @@ set +a
 ./gradlew integrationTest
 ```
 
-Testid käivitavad rakenduse juhuslikul lokaalsel pordil ja läbivad REST → agent → Spring AI → OpenAI voo. Kaetud on API-04, UC-01–UC-14, GROUND-01–GROUND-02 ning SEC-01–SEC-06 ja SEC-08. UC-01 kontrollib eraldi, et mudel kutsub lubatud teadmusriba otsingu callback'i lisaks rakenduse deterministlikule eeltöötlusele. Path traversal (SEC-06) ja muud tuvastatud ründemustrid peatatakse enne mudelit; semantilised variandid jõuavad mudelini ning nende väljund kontrollitakse. Väited kontrollivad stabiilseid käitumisinvariante, allikafaile ja keeldumisi, mitte mudeli sõnastust. SEC-07 on võtmeta API-test, sest liiga pikk sisend peab peatuma enne mudelikõnet. `integrationTest` kontrollib enne testide käivitamist, et `OPENAI_API_KEY` ja `OPENAI_MODEL` on mittetühjad; puuduvate väärtustega lõpeb task veaga, mitte edukalt vahelejätmisega.
+Testid käivitavad rakenduse juhuslikul lokaalsel pordil ja läbivad REST → agent → Spring AI → OpenAI voo. Kaetud on API-04, UC-01–UC-14, GROUND-01–GROUND-02 ning SEC-01–SEC-06 ja SEC-08. UC-01 kontrollib eraldi, et mudel kutsub lubatud teadmusbaasi otsingu tööriista lisaks rakenduse eeltöötlusele. Path traversal (SEC-06) ja muud tuvastatud ründemustrid peatatakse enne mudelit; mudelini jõudvate variantide puhul kontrollitakse ka väljundit. Testid kontrollivad käitumist, allikafaile ja keeldumisi, mitte mudeli täpset sõnastust. SEC-07 on võtmeta API-test, sest liiga pikk sisend peab peatuma enne mudelikõnet. `integrationTest` kontrollib enne testide käivitamist, et `OPENAI_API_KEY` ja `OPENAI_MODEL` on mittetühjad; puuduvate väärtustega lõpeb task veaga.
 
 Gradle genereerib eraldi inimloetavad HTML raportid:
 
@@ -165,13 +165,13 @@ Hindamiseks vajalik päris integratsioonijooks tuleb teha võtmega lokaalselt v�
 
 - Lahendus järgib ülesande teadlikult väikest skoopi: eesmärk ei ole täiuslik tootmissüsteem ega keerukas RAG- või käitusinfrastruktuur. Alltoodud piirangud on seetõttu dokumenteeritud, mitte varjatult tootmiskindlateks eeldatud.
 - Ülevaatusel tuvastatud järgmised puudused on kodutöö kontekstis teadlikult väljaspool ülesande skoopi: sessiooniomaniku autentimine, püsiv või mitme instantsi sessioonisalvestus, asünkroonne/paralleelne tool calling ning tootmiskõlblik rate limiting, kulukontroll ja operatiivmõõdikud. Ülesanne ei nõua autentimisplatvormi, hajusolekut ega tootmiskõlblikku infrastruktuuri.
-- See out-of-scope märge ei vähenda kohustuslikke nõudeid: sisendi suuruse piirang, prompt injection'i käsitlemine, tööriistade allowlist, repository-põhine grounding, allikaviited, turvaline logimine ja võtmeta unit-testid on rakendatud ning testitud.
-- Märksõnaotsing ja mustripõhine ründetuvastus on teadlikult lihtsad. Filter ei pruugi tuvastada kõiki parafraase, Unicode'i homoglüüfe, null-laiusega märke, kodeeritud ründeid või tundlike andmete vorme; mõju piirab mudelist sõltumatu kanoonilise väljundi kontroll.
-- OpenAI otsus võib mudeli ja aja lõikes erineda; rakendus piirab mõju kanoonilise, rakenduse koostatud väljundiga.
+- Need piirangud ei mõjuta kohustuslikke nõudeid: sisendi suuruse piirang, prompt injection'i käsitlemine, tööriistade allowlist, teadmusbaasil põhinevad vastused, allikaviited, turvaline logimine ja võtmeta unit-testid on rakendatud ning testitud.
+- Märksõnaotsing ja mustripõhine ründetuvastus on teadlikult lihtsad. Filter ei pruugi tuvastada kõiki parafraase, Unicode'i homoglüüfe, null-laiusega märke, kodeeritud ründeid või tundlike andmete vorme; mõju piirab mudelist sõltumatu vastuse kontroll.
+- OpenAI vastus võib mudeli ja aja lõikes erineda; rakendus kasutab avalikus vastuses ainult teadmusbaasist pärit teksti.
 - Sessioonid on kliendi valitud ID-ga, autentimata ja omanikuga sidumata. Sama ID teadja saab sessiooni konteksti jätkata. Need aeguvad 30 minuti tegevusetuse järel, on protsessipõhised, piiratud nelja vahetusega, kaovad restardil ja neid ei jagata instantside vahel.
 - Praeguse päringu tõendeid hoiab `ThreadLocal`, mis eeldab dokumenteeritud sünkroonset mudeli- ja tööriistavoogu samal lõimel. Asünkroonse tool calling'u lisamisel tuleb see asendada selgelt edasiantava request-scoped kontekstiga ja lisada concurrency-testid.
 - Rate limiting, mudelikõnede concurrency-limiit, HTTP serveri body-size'i lisapiir ning kulu- ja latentsusmõõdikud puuduvad. OpenAI HTTP-päringul on seadistatav 30-sekundiline vaike-timeout. Ülesanne märgib rate limiting'u soovituslikuks ega nõua tootmiskõlblikku käitusinfrastruktuuri; küsimuse 2000 märgi piir jääb rakendustaseme kaitseks.
 - CI hoiab unit- ja live-integratsioonitestid eraldi; live-workflow nõuab kaitstud Environment'i saladusi ja käsitsi käivitamist.
 - CI käivitab Gitleaksi kogu repole ja Git-ajaloole ning pull request'ide puhul GitHubi dependency review skanneri, mis peatab vähemalt kõrge raskusastmega teadaolevate sõltuvushaavatavustega muudatused. Repos on lisaks Gradle'i kaudu seadistatud Checkstyle, PMD, SpotBugs/FindSecBugs ja JaCoCo.
-- Iga Markdown-fail laaditakse ühe kanoonilise lõiguna. See on viie lühikese faili jaoks piisav, kuid pikema teadmusbaasi korral muutuksid väljavõtted liiga laiaks ning failid tuleks jagada stabiilsete ID-dega väiksemateks lõikudeks.
+- Iga Markdown-fail laaditakse ühe lõiguna. See on viie lühikese faili jaoks piisav, kuid pikema teadmusbaasi korral muutuksid väljavõtted liiga laiaks ning failid tuleks jagada stabiilsete ID-dega väiksemateks lõikudeks.
 - Rakendus sõltub agendipäringute ajal OpenAI saadavusest ning integratsioonitestid tarbivad päris API krediiti.

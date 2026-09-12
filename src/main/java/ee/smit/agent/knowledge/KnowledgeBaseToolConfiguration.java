@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 
-/** Registers precisely the two allowlisted annotated tools for later agent use. */
+/** Registers and validates the two knowledge-base tools. */
 @Configuration
 class KnowledgeBaseToolConfiguration {
 
