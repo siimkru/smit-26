@@ -29,7 +29,7 @@ dependencies {
     compileOnly 'com.github.spotbugs:spotbugs-annotations:4.10.4'
 
     constraints {
-        implementation('org.apache.tomcat.embed:tomcat-embed-core:11.0.25') {
+        implementation('org.apache.tomcat.embed:tomcat-embed-core:11.0.26') {
             because 'Fixes critical Tomcat authorization and authentication vulnerabilities'
         }
         implementation('org.apache.commons:commons-lang3:3.18.0') {
